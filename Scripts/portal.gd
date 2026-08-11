@@ -1,0 +1,12 @@
+extends Area2D
+
+@export var destination: Node2D
+
+func _on_body_entered(body: Node2D) -> void:
+	if body.is_in_group("player"):
+		# Save this portal's destination as the new checkpoint
+		GameManager.checkpoint_position = destination.global_position
+		GameManager.has_checkpoint = true
+
+		# Teleport player
+		body.global_position = destination.global_position

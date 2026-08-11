@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://cge2ov70nx1do"]
+
+[ext_resource type="Texture2D" uid="uid://dftue7fuwvc2o" path="res://Assets/Sidescroller Shooter - Central City/Assets/Tiles.png" id="1_rfiv6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mokdk"]
+size = Vector2(227, 18)
+
+[node name="Bigger_Moving_Platform" type="StaticBody2D" unique_id=500141555]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1208402589]
+position = Vector2(105.61719, -3.5)
+scale = Vector2(7.185988, 1.5)
+texture = ExtResource("1_rfiv6")
+region_enabled = true
+region_rect = Rect2(64.149445, 112.28946, 31.850555, 14.629425)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=934540787]
+position = Vector2(105.5, -4)
+shape = SubResource("RectangleShape2D_mokdk")
