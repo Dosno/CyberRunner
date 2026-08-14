@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://d3wocblk3jfky"]
+
+[ext_resource type="Texture2D" uid="uid://cbo1jxve06yuo" path="res://Assets/Central City/Background/Underworld map.png" id="1_4g2wi"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28nxo"]
+texture = ExtResource("1_4g2wi")
+0:0/size_in_atlas = Vector2i(138, 44)
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_mokdk"]
+sources/0 = SubResource("TileSetAtlasSource_28nxo")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mokdk"]
+size = Vector2(169, 7)
+
+[node name="Underworld" type="Node2D" unique_id=1105564512]
+
+[node name="Underworld" type="TileMapLayer" parent="." unique_id=2109538429]
+tile_map_data = PackedByteArray(0, 0, 40, 0, 250, 255, 0, 0, 0, 0, 0, 0, 0, 0)
+tile_set = SubResource("TileSet_mokdk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=338691269]
+position = Vector2(-369.5, 0.5)
+shape = SubResource("RectangleShape2D_mokdk")
+one_way_collision = true
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="." unique_id=1834001449]
+position = Vector2(-215, 26)
+shape = SubResource("RectangleShape2D_mokdk")
+one_way_collision = true
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="." unique_id=442235129]
+position = Vector2(227, 80)
+shape = SubResource("RectangleShape2D_mokdk")
+one_way_collision = true
