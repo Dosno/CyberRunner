@@ -503,9 +503,8 @@ script = ExtResource("1_cvnsp")
 texture_filter = 1
 position = Vector2(2, 0)
 sprite_frames = SubResource("SpriteFrames_blw5l")
-animation = &"idle"
+animation = &"run"
 autoplay = "idle"
-frame_progress = 0.39056152
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=591667050]
 position = Vector2(0, 13)

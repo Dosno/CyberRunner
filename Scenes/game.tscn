@@ -16,6 +16,8 @@
 [ext_resource type="PackedScene" uid="uid://cge2ov70nx1do" path="res://Assets/bigger_moving_platform.tscn" id="10_ldgsr"]
 [ext_resource type="PackedScene" uid="uid://leimblun6a42" path="res://Scenes/killzone.tscn" id="14_1phco"]
 [ext_resource type="PackedScene" uid="uid://duydpoluq6rre" path="res://Scenes/Spike_Trap.tscn" id="15_nb51f"]
+[ext_resource type="PackedScene" uid="uid://4nlmm2kygdik" path="res://Scenes/underworld_portal.tscn" id="17_85qyi"]
+[ext_resource type="PackedScene" uid="uid://d3wocblk3jfky" path="res://Scenes/underworld.tscn" id="18_iivbl"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1phco"]
 texture = ExtResource("1_3dryh")
@@ -1225,6 +1227,8 @@ size = Vector2(6817, 63)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mokdk"]
 size = Vector2(243, 13)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_mokdk"]
+
 [node name="Game" type="Node2D" unique_id=1390048974]
 script = ExtResource("1_nnt18")
 
@@ -1250,8 +1254,9 @@ tile_set = SubResource("TileSet_8wyap")
 [node name="Player" parent="." unique_id=248399568 groups=["player"] instance=ExtResource("1_ebmjs")]
 position = Vector2(-37, -368)
 
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1647757713]
+[node name="Camera2D2" type="Camera2D" parent="Player" unique_id=1647757713]
 zoom = Vector2(3, 3)
+process_callback = 0
 limit_bottom = 190
 limit_smoothed = true
 position_smoothing_enabled = true
@@ -1390,5 +1395,13 @@ position = Vector2(7861, -233)
 [node name="Area2D12" parent="Spike_Trap" unique_id=1853399705 instance=ExtResource("15_nb51f")]
 position = Vector2(7881, -233)
 
+[node name="UnderworldPortal" parent="." unique_id=634279255 instance=ExtResource("17_85qyi")]
+position = Vector2(9553, -489)
+destination_scene = ExtResource("18_iivbl")
+
+[node name="CollisionShape2D" parent="UnderworldPortal" index="1" unique_id=483778013]
+shape = SubResource("CircleShape2D_mokdk")
+
 [editable path="Portals/Portal"]
 [editable path="Portals/Portal2"]
+[editable path="UnderworldPortal"]

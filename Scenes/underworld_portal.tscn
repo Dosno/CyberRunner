@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://4nlmm2kygdik"]
+
+[ext_resource type="Script" uid="uid://bjxxyk1ffda0x" path="res://Scripts/underworld_portal.gd" id="1_0lhh4"]
+
+[node name="UnderworldPortal" type="Area2D" unique_id=634279255]
+script = ExtResource("1_0lhh4")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1187333212]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=483778013]
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
