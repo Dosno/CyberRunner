@@ -1255,7 +1255,6 @@ tile_set = SubResource("TileSet_8wyap")
 position = Vector2(-30, -372)
 
 [node name="AnimatedSprite2D" parent="Player" index="0" unique_id=1033023764]
-animation = &"roll landing"
 frame_progress = 0.0
 
 [node name="Level1 Moving Platform" parent="." unique_id=270497472 instance=ExtResource("4_3dryh")]
