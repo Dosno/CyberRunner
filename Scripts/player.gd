@@ -5,8 +5,8 @@ const WALK_SPEED = 120.0
 const RUN_SPEED = 180.0
 const CROUCH_SPEED = 60.0
 const SLIDE_SPEED = 280.0
-const DODGE_SPEED = 250
-const AIR_DASH_SPEED = 400.0
+const DODGE_SPEED = 280
+const AIR_DASH_SPEED = 300.0
 const LUNGE_SPEED = 280.0
 const CLIMB_SPEED = 100.0
 const JUMP_VELOCITY = -300.0
@@ -24,7 +24,7 @@ const ANIM_OFFSETS: Dictionary = {
 	"walk": Vector2(0, -1),
 	"run": Vector2(0, 5),
 	"crouching": Vector2(0, 3),
-	"slide": Vector2(0, 0),
+	"slide": Vector2(0, -5),
 
 	"jump": Vector2(0, 0),
 	"double jump_forward": Vector2(0, 0),
@@ -40,7 +40,7 @@ const ANIM_OFFSETS: Dictionary = {
 	"dodge atk 1x_merged": Vector2(30, 0),
 	"dodge atk 1x_merged2": Vector2(30, 0),
 	"dodge atk 2x_merged": Vector2(30, 0),
-	"dodge atk 3x_merged": Vector2(-5, -45),
+	"dodge atk 3x_merged": Vector2(-30, -45),
 
 	"jump atk 2x_merged": Vector2(-30, 0),
 	"dodge atk 3x_fall loop1": Vector2(0, 0),
@@ -67,6 +67,10 @@ var is_walking_toggle: bool = false
 var exiting_crouch: bool = false
 var can_double_jump: bool = true
 var can_air_dash: bool = true
+
+# Coyote Time
+const COYOTE_TIME: float = 0.15
+var coyote_timer: float = 0.0
 
 var combo_step: int = 0
 var combo_timer: float = 0.0
@@ -103,7 +107,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		is_walking_toggle = !is_walking_toggle
 
 func _physics_process(delta: float) -> void:
-	if combo_step > 0:
+	# Combo window timer countdown
+	if combo_step > 0 and current_state != State.ATTACK:
 		combo_timer -= delta
 		if combo_timer <= 0.0:
 			combo_step = 0
@@ -114,22 +119,28 @@ func _physics_process(delta: float) -> void:
 		if current_state != State.DODGE_ATTACK:
 			dodge_combo_step = 0
 
-	# --- INSTANT COMBO CANCEL (Light -> Heavy) ---
+	# --- INPUT BUFFERING DURING ATTACKS ---
 	if current_state in [State.ATTACK, State.DODGE_ATTACK]:
 		if Input.is_action_just_pressed("attack_heavy"):
 			perform_heavy_attack()
 		elif Input.is_action_just_pressed("attack_light"):
 			attack_buffered_light = true
 
+	# Gravity & Plunge Handling
 	if not is_on_floor() and current_state not in [State.AIR_DASH, State.WALL_SLIDE, State.LEDGE_HANG, State.LADDER, State.PLUNGE_ATTACK]:
 		velocity += get_gravity() * delta
 	elif current_state == State.PLUNGE_ATTACK:
 		velocity.y = 500.0
 
+	# Ground Checks & Coyote Timer Management
 	if is_on_floor():
 		can_double_jump = true
 		can_air_dash = true
+		coyote_timer = COYOTE_TIME
+	else:
+		coyote_timer -= delta
 
+	# State Logic Execution
 	match current_state:
 		State.NORMAL:
 			handle_normal_state(delta)
@@ -195,7 +206,7 @@ func handle_normal_state(delta: float) -> void:
 
 	if Input.is_action_just_pressed("attack_heavy") and is_on_floor():
 		if recent_dodge_timer > 0.0 or dodge_combo_step > 0:
-			perform_dodge_attack_step()
+			change_state(State.DODGE_ATTACK)
 		else:
 			perform_heavy_attack()
 		return
@@ -208,9 +219,11 @@ func handle_normal_state(delta: float) -> void:
 		change_state(State.DODGE)
 		return
 
+	# Jump Logic with Coyote Jump
 	if Input.is_action_just_pressed("ui_accept"):
-		if is_on_floor():
+		if is_on_floor() or coyote_timer > 0.0:
 			velocity.y = JUMP_VELOCITY
+			coyote_timer = 0.0  # Consume coyote time instantly
 		elif can_double_jump:
 			velocity.y = JUMP_VELOCITY
 			can_double_jump = false
@@ -240,7 +253,7 @@ func handle_normal_state(delta: float) -> void:
 func handle_crouch_state(delta: float) -> void:
 	if not exiting_crouch and (!Input.is_action_pressed("crouch") or !is_on_floor()):
 		exiting_crouch = true
-		animated_sprite.play("crouching")
+		play_animation("crouching")
 		return
 
 	if exiting_crouch:
@@ -275,7 +288,7 @@ func handle_attack_state(delta: float) -> void:
 
 func handle_dodge_state(_delta: float) -> void:
 	if Input.is_action_just_pressed("attack_heavy") or Input.is_action_just_pressed("attack_light"):
-		perform_dodge_attack_step()
+		change_state(State.DODGE_ATTACK)
 		return
 	velocity.x = dodge_direction * DODGE_SPEED
 
@@ -350,7 +363,7 @@ func perform_light_attack_step() -> void:
 	elif combo_step == 2:
 		anim = "2x 2 atk_merged"
 
-	play_animation(anim)
+	play_animation(anim, true)
 
 	combo_step = (combo_step + 1) % 3
 	combo_timer = COMBO_WINDOW
@@ -359,7 +372,7 @@ func perform_heavy_attack() -> void:
 	current_state = State.ATTACK
 	attack_buffered_light = false
 
-	play_animation("3x atk_merged")
+	play_animation("3x atk_merged", true)
 	combo_step = 0
 
 func perform_dodge_attack_step() -> void:
@@ -375,7 +388,7 @@ func perform_dodge_attack_step() -> void:
 	elif dodge_combo_step == 2:
 		anim = "dodge atk 3x_merged"
 
-	play_animation(anim)
+	play_animation(anim, true)
 
 	dodge_combo_step = (dodge_combo_step + 1) % 3
 	recent_dodge_timer = 0.6
@@ -392,11 +405,11 @@ func update_facing_and_camera(direction: float, delta: float) -> void:
 
 	apply_animation_offset(animated_sprite.animation)
 
-func play_animation(anim_name: String) -> void:
+func play_animation(anim_name: String, force_restart: bool = false) -> void:
 	if not animated_sprite.sprite_frames.has_animation(anim_name):
 		return
 
-	if animated_sprite.animation != anim_name or not animated_sprite.is_playing():
+	if animated_sprite.animation != anim_name or not animated_sprite.is_playing() or force_restart:
 		animated_sprite.stop()
 		animated_sprite.frame = 0
 		apply_animation_offset(anim_name)
@@ -411,6 +424,9 @@ func apply_animation_offset(anim_name: String) -> void:
 		animated_sprite.offset = Vector2.ZERO
 
 func change_state(new_state: State) -> void:
+	if current_state == new_state:
+		return
+
 	current_state = new_state
 
 	match current_state:

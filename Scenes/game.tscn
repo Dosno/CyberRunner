@@ -1254,9 +1254,6 @@ tile_set = SubResource("TileSet_8wyap")
 [node name="Player" parent="." unique_id=248399568 groups=["player"] instance=ExtResource("1_ebmjs")]
 position = Vector2(-30, -372)
 
-[node name="AnimatedSprite2D" parent="Player" index="0" unique_id=1033023764]
-frame_progress = 0.0
-
 [node name="Level1 Moving Platform" parent="." unique_id=270497472 instance=ExtResource("4_3dryh")]
 position = Vector2(1125, -263)
 
