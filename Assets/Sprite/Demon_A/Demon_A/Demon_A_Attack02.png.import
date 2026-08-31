@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4lfl4kcmg8ek"
-path="res://.godot/imported/Buildings.png-045bd8ac6f32453b535ef17d6d228e58.ctex"
+uid="uid://ybhtl6pugjyg"
+path="res://.godot/imported/Demon_A_Attack02.png-5aa6f489cf574e11b76b118af1a78fdd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Sidescroller Shooter - Central City/Social/Buildings.png"
-dest_files=["res://.godot/imported/Buildings.png-045bd8ac6f32453b535ef17d6d228e58.ctex"]
+source_file="res://Assets/Sprite/Demon_A/Demon_A/Demon_A_Attack02.png"
+dest_files=["res://.godot/imported/Demon_A_Attack02.png-5aa6f489cf574e11b76b118af1a78fdd.ctex"]
 
 [params]
 

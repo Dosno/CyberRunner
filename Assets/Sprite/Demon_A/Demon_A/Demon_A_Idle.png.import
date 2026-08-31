@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpk4nlr23n8ef"
-path="res://.godot/imported/Props-01.png-427ca8a839d050059b7b75e644fca0dd.ctex"
+uid="uid://bb8a6vfs0otkt"
+path="res://.godot/imported/Demon_A_Idle.png-227dd68ff318422fbf17065d3c520502.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Sidescroller Shooter - Central City/Social/Props-01.png"
-dest_files=["res://.godot/imported/Props-01.png-427ca8a839d050059b7b75e644fca0dd.ctex"]
+source_file="res://Assets/Sprite/Demon_A/Demon_A/Demon_A_Idle.png"
+dest_files=["res://.godot/imported/Demon_A_Idle.png-227dd68ff318422fbf17065d3c520502.ctex"]
 
 [params]
 

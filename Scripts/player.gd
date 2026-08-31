@@ -5,16 +5,34 @@ const WALK_SPEED = 120.0
 const RUN_SPEED = 180.0
 const CROUCH_SPEED = 60.0
 const SLIDE_SPEED = 280.0
-const DODGE_SPEED = 280
+const DODGE_SPEED = 280.0
 const AIR_DASH_SPEED = 300.0
 const LUNGE_SPEED = 280.0
 const CLIMB_SPEED = 100.0
 const JUMP_VELOCITY = -300.0
 const WALL_JUMP_VELOCITY = Vector2(250.0, -280.0)
 
+# Health Stats & Invincibility
+@export var max_health: int = 5
+var current_health: int
+const INVINCIBILITY_TIME: float = 1.0
+var invincibility_timer: float = 0.0
+
+var hurt_timer: float = 0.0
+const HURT_DURATION: float = 0.25
+
+# Attack Damage Variable
+var current_attack_damage: int = 10
+
 # Camera Look-Ahead Settings
 const LOOK_AHEAD_DISTANCE = 40.0
 const LOOK_AHEAD_SPEED = 3.0
+
+# Respawn & Checkpoint Variables
+var stage_start_position: Vector2 = Vector2.ZERO
+var active_checkpoint: Vector2 = Vector2.ZERO
+var has_checkpoint: bool = false
+var is_respawning: bool = false
 
 # ==============================================================================
 # ANIMATION OFFSET DICTIONARY
@@ -32,8 +50,8 @@ const ANIM_OFFSETS: Dictionary = {
 	"aerial_dash": Vector2(0, 0),
 
 	"1x atk_merged": Vector2(-55, -3),
-	"2x 1 atk_merged": Vector2(30, 0),
-	"2x 2 atk_merged": Vector2(30, 0),
+	"2x 1 atk_merged": Vector2(-40, -10),
+	"2x 2 atk_merged": Vector2(-40, -10),
 	"3x atk_merged": Vector2(-30, -15),
 
 	"back_dodge": Vector2(0, 0),
@@ -57,9 +75,9 @@ const ANIM_OFFSETS: Dictionary = {
 }
 
 # State Machine
-enum State { 
-	NORMAL, CROUCH, SLIDE, ATTACK, DODGE, AIR_ATTACK, DODGE_ATTACK, 
-	PLUNGE_ATTACK, AIR_DASH, WALL_SLIDE, LEDGE_HANG, LADDER, HURT, HEAL 
+enum State {
+	NORMAL, CROUCH, SLIDE, ATTACK, DODGE, AIR_ATTACK, DODGE_ATTACK,
+	PLUNGE_ATTACK, AIR_DASH, WALL_SLIDE, LEDGE_HANG, LADDER, HURT, HEAL, DEAD
 }
 var current_state: State = State.NORMAL
 
@@ -91,7 +109,16 @@ var ledge_position: Vector2 = Vector2.ZERO
 @onready var dash_fx_sprite: AnimatedSprite2D = get_node_or_null("DashFXSprite")
 @onready var dash_smoke_sprite: AnimatedSprite2D = get_node_or_null("DashSmokeSprite")
 
+# Hitbox & Collision Shape References
+@onready var sword_hitbox: Area2D = get_node_or_null("Hitbox")
+@onready var hitbox_right: CollisionShape2D = get_node_or_null("Hitbox/CollisionShapeRight")
+@onready var hitbox_left: CollisionShape2D = get_node_or_null("Hitbox/CollisionShapeLeft")
+
 func _ready() -> void:
+	current_health = max_health
+	stage_start_position = global_position
+	add_to_group("player")
+	
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 5.0
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -102,11 +129,34 @@ func _ready() -> void:
 	if not animated_sprite.animation_finished.is_connected(_on_animation_finished):
 		animated_sprite.animation_finished.connect(_on_animation_finished)
 
+	if sword_hitbox:
+		disable_sword_hitbox()
+		if not sword_hitbox.body_entered.is_connected(_on_sword_hitbox_body_entered):
+			sword_hitbox.body_entered.connect(_on_sword_hitbox_body_entered)
+		if not sword_hitbox.area_entered.is_connected(_on_sword_hitbox_area_entered):
+			sword_hitbox.area_entered.connect(_on_sword_hitbox_area_entered)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("walk_toggle"):
 		is_walking_toggle = !is_walking_toggle
 
 func _physics_process(delta: float) -> void:
+	if current_state == State.DEAD or is_respawning:
+		return
+
+	# Handle Invincibility Blinking
+	if invincibility_timer > 0.0:
+		invincibility_timer -= delta
+		animated_sprite.visible = fmod(invincibility_timer, 0.2) > 0.1
+	else:
+		animated_sprite.visible = true
+
+	# Handle Hurt State Timer Recovery
+	if current_state == State.HURT:
+		hurt_timer -= delta
+		if hurt_timer <= 0.0:
+			change_state(State.NORMAL)
+
 	# Combo window timer countdown
 	if combo_step > 0 and current_state != State.ATTACK:
 		combo_timer -= delta
@@ -119,20 +169,20 @@ func _physics_process(delta: float) -> void:
 		if current_state != State.DODGE_ATTACK:
 			dodge_combo_step = 0
 
-	# --- INPUT BUFFERING DURING ATTACKS ---
+	# Input Buffering
 	if current_state in [State.ATTACK, State.DODGE_ATTACK]:
 		if Input.is_action_just_pressed("attack_heavy"):
 			perform_heavy_attack()
 		elif Input.is_action_just_pressed("attack_light"):
 			attack_buffered_light = true
 
-	# Gravity & Plunge Handling
+	# Gravity
 	if not is_on_floor() and current_state not in [State.AIR_DASH, State.WALL_SLIDE, State.LEDGE_HANG, State.LADDER, State.PLUNGE_ATTACK]:
 		velocity += get_gravity() * delta
 	elif current_state == State.PLUNGE_ATTACK:
 		velocity.y = 500.0
 
-	# Ground Checks & Coyote Timer Management
+	# Ground Checks
 	if is_on_floor():
 		can_double_jump = true
 		can_air_dash = true
@@ -140,7 +190,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		coyote_timer -= delta
 
-	# State Logic Execution
 	match current_state:
 		State.NORMAL:
 			handle_normal_state(delta)
@@ -219,11 +268,10 @@ func handle_normal_state(delta: float) -> void:
 		change_state(State.DODGE)
 		return
 
-	# Jump Logic with Coyote Jump
 	if Input.is_action_just_pressed("ui_accept"):
 		if is_on_floor() or coyote_timer > 0.0:
 			velocity.y = JUMP_VELOCITY
-			coyote_timer = 0.0  # Consume coyote time instantly
+			coyote_timer = 0.0
 		elif can_double_jump:
 			velocity.y = JUMP_VELOCITY
 			can_double_jump = false
@@ -281,7 +329,8 @@ func handle_crouch_state(delta: float) -> void:
 			animated_sprite.pause()
 
 func handle_slide_state(_delta: float) -> void:
-	velocity.x = (1.0 if animated_sprite.flip_h else -1.0) * SLIDE_SPEED
+	var facing_dir = 1.0 if animated_sprite.flip_h else -1.0
+	velocity.x = facing_dir * SLIDE_SPEED
 
 func handle_attack_state(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0, WALK_SPEED * 2.0 * delta)
@@ -306,14 +355,15 @@ func handle_plunge_attack_state(_delta: float) -> void:
 
 func handle_air_dash_state(_delta: float) -> void:
 	velocity.y = 0
-	velocity.x = (1.0 if animated_sprite.flip_h else -1.0) * AIR_DASH_SPEED
+	var facing_dir = 1.0 if animated_sprite.flip_h else -1.0
+	velocity.x = facing_dir * AIR_DASH_SPEED
 
 func handle_wall_slide_state(_delta: float) -> void:
 	velocity.y = 60.0
 	play_animation("wall slide")
 
 	if Input.is_action_just_pressed("ui_accept"):
-		var wall_dir = -1.0 if animated_sprite.flip_h else 1.0
+		var wall_dir = 1.0 if animated_sprite.flip_h else -1.0
 		velocity = Vector2(WALL_JUMP_VELOCITY.x * wall_dir, WALL_JUMP_VELOCITY.y)
 		play_animation("wall jump")
 		change_state(State.NORMAL)
@@ -342,28 +392,98 @@ func handle_ladder_state(_delta: float) -> void:
 		change_state(State.NORMAL)
 
 func handle_hurt_state(delta: float) -> void:
-	velocity.x = move_toward(velocity.x, 0, WALK_SPEED * delta)
+	velocity.x = move_toward(velocity.x, 0, WALK_SPEED * 6.0 * delta)
 
 func handle_heal_state(_delta: float) -> void:
 	velocity.x = 0
 
-func take_damage(_amount: int, is_heavy: bool = false) -> void:
-	change_state(State.HURT)
-	play_animation("hard hit" if is_heavy else "normal hit")
+func take_damage(amount: int = 1, attacker_pos: Vector2 = Vector2.ZERO) -> void:
+	if current_state in [State.HURT, State.DEAD] or invincibility_timer > 0.0 or is_respawning:
+		return
 
-# --- ATTACK ROUTINES ---
+	invincibility_timer = INVINCIBILITY_TIME
+	hurt_timer = HURT_DURATION
+	current_health -= amount
+	
+	if current_health <= 0:
+		current_state = State.DEAD
+		velocity = Vector2.ZERO
+		play_animation("hard hit")
+		start_death_respawn_sequence()
+	else:
+		change_state(State.HURT)
+		
+		var knock_dir = 1.0
+		if attacker_pos != Vector2.ZERO:
+			knock_dir = sign(global_position.x - attacker_pos.x)
+			if knock_dir == 0:
+				knock_dir = -1.0 if animated_sprite.flip_h else 1.0
+		else:
+			knock_dir = -1.0 if animated_sprite.flip_h else 1.0
+
+		velocity.x = knock_dir * 300.0
+		velocity.y = -150.0
+		play_animation("normal hit")
+
+# --- RESPAWN & FADE SEQUENCE ---
+
+func start_death_respawn_sequence() -> void:
+	is_respawning = true
+	
+	var fade_rect: ColorRect = get_node_or_null("../CanvasLayer/FadeRect")
+	if not fade_rect:
+		fade_rect = get_tree().root.find_child("FadeRect", true, false)
+
+	# 1. Fade screen to Black
+	if fade_rect:
+		var tween = create_tween()
+		tween.tween_property(fade_rect, "modulate:a", 1.0, 1.2)
+		await tween.finished
+	else:
+		await get_tree().create_timer(1.2).timeout
+
+	# 2. Respawn at active Portal Checkpoint (or fall back to Stage Start)
+	if has_checkpoint:
+		global_position = active_checkpoint
+	else:
+		global_position = stage_start_position
+
+	velocity = Vector2.ZERO
+	current_health = max_health
+
+	# 3. Fade screen back to Transparent
+	if fade_rect:
+		var tween_in = create_tween()
+		tween_in.tween_property(fade_rect, "modulate:a", 0.0, 0.8)
+
+	# 4. Perform 5 Character Blinks
+	for i in range(5):
+		animated_sprite.visible = false
+		await get_tree().create_timer(0.12).timeout
+		animated_sprite.visible = true
+		await get_tree().create_timer(0.12).timeout
+
+	is_respawning = false
+	change_state(State.NORMAL)
+
+# --- ATTACK ROUTINES & DAMAGE SCALING ---
 
 func perform_light_attack_step() -> void:
 	current_state = State.ATTACK
 	attack_buffered_light = false
 
 	var anim = "1x atk_merged"
+	current_attack_damage = 10
+
 	if combo_step == 1:
 		anim = "2x 1 atk_merged"
+		current_attack_damage = 12
 	elif combo_step == 2:
 		anim = "2x 2 atk_merged"
+		current_attack_damage = 18
 
 	play_animation(anim, true)
+	enable_sword_hitbox()
 
 	combo_step = (combo_step + 1) % 3
 	combo_timer = COMBO_WINDOW
@@ -372,7 +492,9 @@ func perform_heavy_attack() -> void:
 	current_state = State.ATTACK
 	attack_buffered_light = false
 
+	current_attack_damage = 20
 	play_animation("3x atk_merged", true)
+	enable_sword_hitbox()
 	combo_step = 0
 
 func perform_dodge_attack_step() -> void:
@@ -383,17 +505,51 @@ func perform_dodge_attack_step() -> void:
 	velocity.x = facing_dir * LUNGE_SPEED
 
 	var anim = "dodge atk 1x_merged"
+	current_attack_damage = 12
+
 	if dodge_combo_step == 1:
 		anim = "dodge atk 2x_merged"
+		current_attack_damage = 15
 	elif dodge_combo_step == 2:
 		anim = "dodge atk 3x_merged"
+		current_attack_damage = 25
 
 	play_animation(anim, true)
+	enable_sword_hitbox()
 
 	dodge_combo_step = (dodge_combo_step + 1) % 3
 	recent_dodge_timer = 0.6
 
-# --- HELPERS & STATE MANAGEMENT ---
+# --- HITBOX MANAGEMENT ---
+
+func enable_sword_hitbox() -> void:
+	if sword_hitbox:
+		sword_hitbox.monitoring = true
+		if animated_sprite.flip_h:
+			if hitbox_left: hitbox_left.disabled = true
+			if hitbox_right: hitbox_right.disabled = false
+		else:
+			if hitbox_left: hitbox_left.disabled = false
+			if hitbox_right: hitbox_right.disabled = true
+
+func disable_sword_hitbox() -> void:
+	if sword_hitbox:
+		sword_hitbox.monitoring = false
+	if hitbox_left: hitbox_left.disabled = true
+	if hitbox_right: hitbox_right.disabled = true
+
+func _on_sword_hitbox_body_entered(body: Node2D) -> void:
+	_apply_damage_to_target(body)
+
+func _on_sword_hitbox_area_entered(area: Area2D) -> void:
+	_apply_damage_to_target(area)
+	_apply_damage_to_target(area.get_parent())
+
+func _apply_damage_to_target(target: Node) -> void:
+	if target and target != self and target.has_method("take_damage"):
+		target.take_damage(current_attack_damage)
+
+# --- HELPERS ---
 
 func update_facing_and_camera(direction: float, delta: float) -> void:
 	if direction < 0:
@@ -427,6 +583,7 @@ func change_state(new_state: State) -> void:
 	if current_state == new_state:
 		return
 
+	disable_sword_hitbox()
 	current_state = new_state
 
 	match current_state:
@@ -469,6 +626,8 @@ func change_state(new_state: State) -> void:
 			play_animation("crouching")
 
 func _on_animation_finished() -> void:
+	disable_sword_hitbox()
+
 	if current_state == State.ATTACK:
 		if attack_buffered_light:
 			perform_light_attack_step()
@@ -479,7 +638,7 @@ func _on_animation_finished() -> void:
 			perform_dodge_attack_step()
 		else:
 			change_state(State.NORMAL)
-	elif current_state in [State.DODGE, State.AIR_ATTACK, State.PLUNGE_ATTACK, State.SLIDE, State.AIR_DASH, State.HURT, State.HEAL]:
+	elif current_state in [State.HURT, State.DODGE, State.AIR_ATTACK, State.PLUNGE_ATTACK, State.SLIDE, State.AIR_DASH, State.HEAL]:
 		change_state(State.NORMAL)
 	elif current_state == State.CROUCH and exiting_crouch:
 		exiting_crouch = false

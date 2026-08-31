@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmntp1a4g1mto"
-path="res://.godot/imported/MockUp-01.png-298ac3f36a767f3d3832a7123e300a50.ctex"
+uid="uid://crmby7spcaajl"
+path="res://.godot/imported/Blood Monster_A_Death.png-e92fcdf1425baa257e399e60ff68f19a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Sidescroller Shooter - Central City/Social/MockUp-01.png"
-dest_files=["res://.godot/imported/MockUp-01.png-298ac3f36a767f3d3832a7123e300a50.ctex"]
+source_file="res://Assets/Sprite/Blood Monster_A/Blood Monster_A/Blood Monster_A_Death.png"
+dest_files=["res://.godot/imported/Blood Monster_A_Death.png-e92fcdf1425baa257e399e60ff68f19a.ctex"]
 
 [params]
 

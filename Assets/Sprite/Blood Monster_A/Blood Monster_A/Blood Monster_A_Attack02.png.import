@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnew338ilbcrj"
-path="res://.godot/imported/Background Props.png-6a1397b0d417e5a48601f9f02611f657.ctex"
+uid="uid://dd5x3iy481ued"
+path="res://.godot/imported/Blood Monster_A_Attack02.png-e59f659db9e63ffd659b892634dc8882.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Sidescroller Shooter - Central City/Background/Background Props.png"
-dest_files=["res://.godot/imported/Background Props.png-6a1397b0d417e5a48601f9f02611f657.ctex"]
+source_file="res://Assets/Sprite/Blood Monster_A/Blood Monster_A/Blood Monster_A_Attack02.png"
+dest_files=["res://.godot/imported/Blood Monster_A_Attack02.png-e59f659db9e63ffd659b892634dc8882.ctex"]
 
 [params]
 

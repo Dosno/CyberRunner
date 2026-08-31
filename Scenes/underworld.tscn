@@ -3,6 +3,9 @@
 [ext_resource type="Texture2D" uid="uid://cbo1jxve06yuo" path="res://Assets/Sidescroller Shooter - Central City/Background/Underworld map.png" id="1_4g2wi"]
 [ext_resource type="PackedScene" uid="uid://bslwn46o8lm53" path="res://Scenes/player.tscn" id="2_28nxo"]
 [ext_resource type="PackedScene" uid="uid://bdix1iq7ej6ls" path="res://Assets/Moving_Platform.tscn" id="3_qfmau"]
+[ext_resource type="PackedScene" uid="uid://di0ibdd0xk3sf" path="res://Scenes/blood_monster_a.tscn" id="4_uw0o6"]
+[ext_resource type="PackedScene" uid="uid://dhdpgukqk811l" path="res://Scenes/Demon_A.tscn" id="5_5t5tt"]
+[ext_resource type="PackedScene" uid="uid://leimblun6a42" path="res://Scenes/killzone.tscn" id="6_5t5tt"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28nxo"]
 texture = ExtResource("1_4g2wi")
@@ -12,8 +15,20 @@ texture = ExtResource("1_4g2wi")
 [sub_resource type="TileSet" id="TileSet_8wyap"]
 sources/0 = SubResource("TileSetAtlasSource_28nxo")
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qfmau"]
+size = Vector2(475, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3q5ob"]
+size = Vector2(522.5, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uw0o6"]
+size = Vector2(1525, 16)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mokdk"]
-size = Vector2(337.37347, 16)
+size = Vector2(761, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5t5tt"]
+size = Vector2(433.46118, 16)
 
 [sub_resource type="Animation" id="Animation_3q5ob"]
 length = 0.001
@@ -27,12 +42,12 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(258, 76)]
+"values": [Vector2(806, 165)]
 }
 
 [sub_resource type="Animation" id="Animation_uw0o6"]
 resource_name = "move"
-length = 3.0000000000000004
+length = 2.0
 loop_mode = 2
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -41,10 +56,10 @@ tracks/0/path = NodePath(".:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 3),
+"times": PackedFloat32Array(0, 2),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(258, 76), Vector2(562, 74)]
+"values": [Vector2(806, 165), Vector2(562, 166)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_5t5tt"]
@@ -65,12 +80,12 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(1279, 111)]
+"values": [Vector2(848, 166)]
 }
 
 [sub_resource type="Animation" id="Animation_rqmxw"]
 resource_name = "moviNE"
-length = 3.0000000000000004
+length = 2.0
 loop_mode = 2
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -79,10 +94,10 @@ tracks/0/path = NodePath(".:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 3),
+"times": PackedFloat32Array(0, 2),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(1279, 111), Vector2(1444, -47)]
+"values": [Vector2(848, 166), Vector2(1022, -99)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_0jpjb"]
@@ -96,19 +111,43 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
+tracks/0/path = NodePath("../moving platform1:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(1491, -46)]
+"values": [Vector2(806, 165)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("../moving platform 2:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(848, 166)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1079, -99)]
 }
 
 [sub_resource type="Animation" id="Animation_7tg8k"]
 resource_name = "downmove"
-length = 3.0000000000000004
+length = 2.0
 loop_mode = 2
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -117,16 +156,51 @@ tracks/0/path = NodePath(".:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 3),
+"times": PackedFloat32Array(0, 2),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(1491, -46), Vector2(1725, 42)]
+"values": [Vector2(1289, 197), Vector2(1079, -99)]
+}
+
+[sub_resource type="Animation" id="Animation_5t5tt"]
+resource_name = "right_left"
+length = 2.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../moving platform1:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(806, 165), Vector2(557, 167)]
+}
+
+[sub_resource type="Animation" id="Animation_0jpjb"]
+resource_name = "up"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../moving platform 2:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(848, 166), Vector2(1024, -98)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_d8o0r"]
 _data = {
 &"RESET": SubResource("Animation_58e3p"),
-&"downmove": SubResource("Animation_7tg8k")
+&"downmove": SubResource("Animation_7tg8k"),
+&"right_left": SubResource("Animation_5t5tt"),
+&"up": SubResource("Animation_0jpjb")
 }
 
 [sub_resource type="Animation" id="Animation_dg57k"]
@@ -141,11 +215,23 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(2101, 65)]
+"values": [Vector2(3122, 248)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("../moving platform 5:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(3183, 250)]
 }
 
-[sub_resource type="Animation" id="Animation_pbw3y"]
-resource_name = "movINE"
+[sub_resource type="Animation" id="Animation_5upiu"]
+resource_name = "dawdada"
 length = 3.0000000000000004
 loop_mode = 2
 tracks/0/type = "value"
@@ -158,56 +244,106 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 3),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(2101, 65), Vector2(2295, 61)]
+"values": [Vector2(4803, 165), Vector2(5286, 133)]
+}
+
+[sub_resource type="Animation" id="Animation_pbw3y"]
+resource_name = "eq243eqe"
+length = 1.5
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../moving platform 5:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(3183, 250), Vector2(3388, 250)]
+}
+
+[sub_resource type="Animation" id="Animation_d8o0r"]
+resource_name = "waeczxczxc"
+length = 1.5
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(3122, 248), Vector2(2906, 248)]
+}
+
+[sub_resource type="Animation" id="Animation_3ij18"]
+resource_name = "xcvzxfvs"
+length = 5.0
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.01, 5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(3459, 251), Vector2(3459, 251), Vector2(3982, 170)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_3ij18"]
 _data = {
 &"RESET": SubResource("Animation_dg57k"),
-&"movINE": SubResource("Animation_pbw3y")
+&"dawdada": SubResource("Animation_5upiu"),
+&"eq243eqe": SubResource("Animation_pbw3y"),
+&"waeczxczxc": SubResource("Animation_d8o0r"),
+&"xcvzxfvs": SubResource("Animation_3ij18")
 }
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cyv2j"]
+size = Vector2(6817, 63)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rqmxw"]
+size = Vector2(243, 13)
 
 [node name="Underworld" type="Node2D" unique_id=1617283129]
 
-[node name="Player" parent="." unique_id=248399568 instance=ExtResource("2_28nxo")]
-position = Vector2(160, 38)
-
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1189613952]
 texture_filter = 1
-scale = Vector2(1.3101308, 0.658702)
+scale = Vector2(3.0102394, 1.539107)
 tile_map_data = PackedByteArray(0, 0, 59, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0)
 tile_set = SubResource("TileSet_8wyap")
 
 [node name="Ground 2" type="StaticBody2D" parent="." unique_id=756893670]
-position = Vector2(249, -124)
+position = Vector2(644, 50)
 
 [node name="Colission2" type="CollisionShape2D" parent="Ground 2" unique_id=1701451988]
-position = Vector2(-188.31326, 199)
-shape = SubResource("RectangleShape2D_mokdk")
+position = Vector2(-354.5, 115)
+shape = SubResource("RectangleShape2D_qfmau")
 
 [node name="Ground 3" type="StaticBody2D" parent="." unique_id=1603944789]
-position = Vector2(50, -140)
+position = Vector2(-78, -79)
 
 [node name="Colission2" type="CollisionShape2D" parent="Ground 3" unique_id=712813062]
-position = Vector2(-188.31326, 199)
-shape = SubResource("RectangleShape2D_mokdk")
+position = Vector2(-117.25, 204)
+shape = SubResource("RectangleShape2D_3q5ob")
 
 [node name="Ground 4" type="StaticBody2D" parent="." unique_id=1770409931]
-position = Vector2(946, -88)
+position = Vector2(1786, 49)
 
 [node name="Colission2" type="CollisionShape2D" parent="Ground 4" unique_id=2105074939]
-position = Vector2(-188.31326, 199)
-shape = SubResource("RectangleShape2D_mokdk")
-
-[node name="Ground 5" type="StaticBody2D" parent="." unique_id=103707059]
-position = Vector2(1271, -88)
-
-[node name="Colission2" type="CollisionShape2D" parent="Ground 5" unique_id=2126697760]
-position = Vector2(-188.31326, 199)
-shape = SubResource("RectangleShape2D_mokdk")
+position = Vector2(327.5, 198)
+shape = SubResource("RectangleShape2D_uw0o6")
 
 [node name="Ground 6" type="StaticBody2D" parent="." unique_id=1638762500]
-position = Vector2(2087, -121)
+position = Vector2(4588.0005, -32.000004)
 scale = Vector2(0.90204144, 0.99940664)
 
 [node name="Colission3" type="CollisionShape2D" parent="Ground 6" unique_id=640394689]
@@ -216,16 +352,16 @@ scale = Vector2(0.99999994, 1)
 shape = SubResource("RectangleShape2D_mokdk")
 
 [node name="Ground 7" type="StaticBody2D" parent="." unique_id=1796483171]
-position = Vector2(2641, -140.00002)
+position = Vector2(5653, -73.00002)
 scale = Vector2(0.90204144, 0.99940664)
 
 [node name="Colission3" type="CollisionShape2D" parent="Ground 7" unique_id=1955749250]
-position = Vector2(-187.65161, 198.11757)
-scale = Vector2(0.99999994, 1)
-shape = SubResource("RectangleShape2D_mokdk")
+position = Vector2(-138.5747, 199.11816)
+scale = Vector2(0.99999994, 0.9999999)
+shape = SubResource("RectangleShape2D_5t5tt")
 
 [node name="Ground 8" type="StaticBody2D" parent="." unique_id=1389647909]
-position = Vector2(2703, -155)
+position = Vector2(6066, -110.999985)
 scale = Vector2(0.610149, 0.990886)
 
 [node name="Colission3" type="CollisionShape2D" parent="Ground 8" unique_id=753353425]
@@ -234,28 +370,136 @@ scale = Vector2(0.99999994, 0.99999994)
 shape = SubResource("RectangleShape2D_mokdk")
 
 [node name="moving platform1" parent="." unique_id=270497472 instance=ExtResource("3_qfmau")]
-position = Vector2(258, 76)
+position = Vector2(806, 165)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform1" unique_id=1531123007]
 libraries/ = SubResource("AnimationLibrary_5t5tt")
 autoplay = &"move"
 
 [node name="moving platform 2" parent="." unique_id=499723139 instance=ExtResource("3_qfmau")]
-position = Vector2(1279, 111)
+position = Vector2(848, 166)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform 2" unique_id=849622266]
 libraries/ = SubResource("AnimationLibrary_0jpjb")
+autoplay = &"moviNE"
 
 [node name="movIng platform 3" parent="." unique_id=452471465 instance=ExtResource("3_qfmau")]
-position = Vector2(1491, -46)
+position = Vector2(1079, -99)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="movIng platform 3" unique_id=412342169]
 libraries/ = SubResource("AnimationLibrary_d8o0r")
 autoplay = &"downmove"
 
 [node name="moving platform 4" parent="." unique_id=1077290719 instance=ExtResource("3_qfmau")]
-position = Vector2(2101, 65)
+position = Vector2(3122, 248)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform 4" unique_id=744380838]
 libraries/ = SubResource("AnimationLibrary_3ij18")
-autoplay = &"movINE"
+autoplay = &"waeczxczxc"
+
+[node name="moving platform 5" parent="." unique_id=1805619435 instance=ExtResource("3_qfmau")]
+position = Vector2(3183, 250)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform 5" unique_id=1739003828]
+libraries/ = SubResource("AnimationLibrary_3ij18")
+autoplay = &"eq243eqe"
+
+[node name="moving platform 6" parent="." unique_id=1483615811 instance=ExtResource("3_qfmau")]
+position = Vector2(3122, 248)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform 6" unique_id=457161214]
+libraries/ = SubResource("AnimationLibrary_3ij18")
+autoplay = &"xcvzxfvs"
+
+[node name="moving platform 7" parent="." unique_id=533197811 instance=ExtResource("3_qfmau")]
+position = Vector2(3122, 248)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="moving platform 7" unique_id=691705768]
+libraries/ = SubResource("AnimationLibrary_3ij18")
+autoplay = &"dawdada"
+
+[node name="Blood Monster_A" parent="." unique_id=186076041 instance=ExtResource("4_uw0o6")]
+position = Vector2(225, 135)
+scale = Vector2(1.735, 1.735)
+
+[node name="Demon_A" parent="." unique_id=143482283 instance=ExtResource("5_5t5tt")]
+position = Vector2(-316, 91)
+
+[node name="Demon_A2" parent="." unique_id=1908941932 instance=ExtResource("5_5t5tt")]
+position = Vector2(1648, 201)
+
+[node name="Demon_A3" parent="." unique_id=940614598 instance=ExtResource("5_5t5tt")]
+position = Vector2(1740, 202)
+
+[node name="Demon_A4" parent="." unique_id=580793166 instance=ExtResource("5_5t5tt")]
+position = Vector2(1862, 208)
+
+[node name="Demon_A5" parent="." unique_id=258021934 instance=ExtResource("5_5t5tt")]
+position = Vector2(2441, 200)
+
+[node name="Demon_A6" parent="." unique_id=25281251 instance=ExtResource("5_5t5tt")]
+position = Vector2(2489, 215)
+
+[node name="Demon_A7" parent="." unique_id=97241456 instance=ExtResource("5_5t5tt")]
+position = Vector2(2601, 207)
+
+[node name="Blood Monster_A2" parent="." unique_id=1638908531 instance=ExtResource("4_uw0o6")]
+position = Vector2(1994, 200)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A3" parent="." unique_id=1194728237 instance=ExtResource("4_uw0o6")]
+position = Vector2(2064, 198)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A4" parent="." unique_id=212976840 instance=ExtResource("4_uw0o6")]
+position = Vector2(2108, 202)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A5" parent="." unique_id=1899325432 instance=ExtResource("4_uw0o6")]
+position = Vector2(2143, 214)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A6" parent="." unique_id=872860570 instance=ExtResource("4_uw0o6")]
+position = Vector2(2289, 211)
+scale = Vector2(1.735, 1.735)
+
+[node name="Player" parent="." unique_id=248399568 instance=ExtResource("2_28nxo")]
+position = Vector2(-56, 24)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1102674992]
+
+[node name="FadeRect" type="ColorRect" parent="CanvasLayer" unique_id=1554432664]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Killzones" type="Node2D" parent="." unique_id=256455595]
+position = Vector2(8, 448)
+
+[node name="Killzone" parent="Killzones" unique_id=133367386 instance=ExtResource("6_5t5tt")]
+position = Vector2(-168, 207)
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone" unique_id=1077813028]
+position = Vector2(-197, -298)
+shape = SubResource("RectangleShape2D_cyv2j")
+
+[node name="Killzone2" parent="Killzones" unique_id=970091164 instance=ExtResource("6_5t5tt")]
+position = Vector2(2992, -91)
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone2" unique_id=1370250478]
+position = Vector2(3287.5, -4)
+shape = SubResource("RectangleShape2D_cyv2j")
+
+[node name="Killzone3" parent="Killzones" unique_id=1741964046 instance=ExtResource("6_5t5tt")]
+position = Vector2(7658, -233)
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone3" unique_id=1725016966]
+position = Vector2(111.5, 3.5)
+shape = SubResource("RectangleShape2D_rqmxw")

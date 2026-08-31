@@ -4368,7 +4368,13 @@ _data = {
 &"idle": SubResource("Animation_ukyrk")
 }
 
-[node name="Player" type="CharacterBody2D" unique_id=248399568]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mokdk"]
+size = Vector2(15, 49)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8wyap"]
+size = Vector2(20, 42)
+
+[node name="Player" type="CharacterBody2D" unique_id=248399568 groups=["player"]]
 safe_margin = 0.01
 script = ExtResource("1_cvnsp")
 
@@ -4376,7 +4382,7 @@ script = ExtResource("1_cvnsp")
 texture_filter = 1
 position = Vector2(2, -1)
 sprite_frames = SubResource("SpriteFrames_blw5l")
-animation = &"3x atk_merged"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=591667050]
 position = Vector2(1, 13)
@@ -4388,3 +4394,20 @@ libraries/ = SubResource("AnimationLibrary_7dp3o")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1763473124]
 zoom = Vector2(3, 3)
 position_smoothing_enabled = true
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=706949323]
+position = Vector2(0, -2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1395740276]
+position = Vector2(-1.5, 0.5)
+shape = SubResource("RectangleShape2D_mokdk")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=1074289018]
+position = Vector2(60, 0)
+
+[node name="CollisionShapeRight" type="CollisionShape2D" parent="Hitbox" unique_id=796430386]
+shape = SubResource("RectangleShape2D_8wyap")
+
+[node name="CollisionShapeLeft" type="CollisionShape2D" parent="Hitbox" unique_id=1513776021]
+position = Vector2(-119, -2)
+shape = SubResource("RectangleShape2D_8wyap")

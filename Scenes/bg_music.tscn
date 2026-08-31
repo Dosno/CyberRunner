@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://c1eejntbjc5es"]
 
 [ext_resource type="AudioStream" uid="uid://885eh4dxwrgr" path="res://Assets/sounds/Desktop 2026.08.11 - 22.40.35.02.DVR.wav" id="1_wrh0v"]
+[ext_resource type="Script" uid="uid://dy7emt3pqst2d" path="res://Scripts/bg_music.gd" id="2_0kug2"]
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer" unique_id=389330057]
 stream = ExtResource("1_wrh0v")
 volume_db = -12.18
 autoplay = true
+script = ExtResource("2_0kug2")
