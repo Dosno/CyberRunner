@@ -1249,7 +1249,7 @@ tile_map_data = PackedByteArray("AADHAPD/AAAAAAAAAADIAPD/AAABAAAAAADJAPD/AAACAAA
 tile_set = SubResource("TileSet_8wyap")
 
 [node name="Player" parent="." unique_id=248399568 instance=ExtResource("1_ebmjs")]
-position = Vector2(-30, -372)
+position = Vector2(49, -409)
 
 [node name="Level1 Moving Platform" parent="." unique_id=270497472 instance=ExtResource("4_3dryh")]
 position = Vector2(1125, -263)

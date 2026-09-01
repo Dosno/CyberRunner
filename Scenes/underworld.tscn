@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://di0ibdd0xk3sf" path="res://Scenes/blood_monster_a.tscn" id="4_uw0o6"]
 [ext_resource type="PackedScene" uid="uid://dhdpgukqk811l" path="res://Scenes/Demon_A.tscn" id="5_5t5tt"]
 [ext_resource type="PackedScene" uid="uid://leimblun6a42" path="res://Scenes/killzone.tscn" id="6_5t5tt"]
+[ext_resource type="PackedScene" uid="uid://cce23c3g6b1m8" path="res://Scenes/portal_2.tscn" id="7_cyv2j"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28nxo"]
 texture = ExtResource("1_4g2wi")
@@ -423,44 +424,68 @@ position = Vector2(225, 135)
 scale = Vector2(1.735, 1.735)
 
 [node name="Demon_A" parent="." unique_id=143482283 instance=ExtResource("5_5t5tt")]
-position = Vector2(-316, 91)
+position = Vector2(4107, 137)
 
 [node name="Demon_A2" parent="." unique_id=1908941932 instance=ExtResource("5_5t5tt")]
-position = Vector2(1648, 201)
+position = Vector2(4229, 134)
 
 [node name="Demon_A3" parent="." unique_id=940614598 instance=ExtResource("5_5t5tt")]
-position = Vector2(1740, 202)
+position = Vector2(4321, 135)
 
 [node name="Demon_A4" parent="." unique_id=580793166 instance=ExtResource("5_5t5tt")]
-position = Vector2(1862, 208)
+position = Vector2(4443, 141)
 
 [node name="Demon_A5" parent="." unique_id=258021934 instance=ExtResource("5_5t5tt")]
-position = Vector2(2441, 200)
+position = Vector2(4547, 123)
 
 [node name="Demon_A6" parent="." unique_id=25281251 instance=ExtResource("5_5t5tt")]
-position = Vector2(2489, 215)
+position = Vector2(4595, 138)
 
 [node name="Demon_A7" parent="." unique_id=97241456 instance=ExtResource("5_5t5tt")]
-position = Vector2(2601, 207)
+position = Vector2(2536, 216)
+
+[node name="Demon_A9" parent="." unique_id=800357810 instance=ExtResource("5_5t5tt")]
+position = Vector2(2655, 211)
+
+[node name="Demon_A10" parent="." unique_id=1149305923 instance=ExtResource("5_5t5tt")]
+position = Vector2(2702, 211)
+
+[node name="Demon_A11" parent="." unique_id=955072289 instance=ExtResource("5_5t5tt")]
+position = Vector2(365, 139)
+
+[node name="Demon_A8" parent="." unique_id=1852636569 instance=ExtResource("5_5t5tt")]
+position = Vector2(2422, 204)
 
 [node name="Blood Monster_A2" parent="." unique_id=1638908531 instance=ExtResource("4_uw0o6")]
-position = Vector2(1994, 200)
+position = Vector2(1707, 208)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A7" parent="." unique_id=635393956 instance=ExtResource("4_uw0o6")]
+position = Vector2(1613, 207)
 scale = Vector2(1.735, 1.735)
 
 [node name="Blood Monster_A3" parent="." unique_id=1194728237 instance=ExtResource("4_uw0o6")]
-position = Vector2(2064, 198)
+position = Vector2(1787, 212)
 scale = Vector2(1.735, 1.735)
 
 [node name="Blood Monster_A4" parent="." unique_id=212976840 instance=ExtResource("4_uw0o6")]
-position = Vector2(2108, 202)
+position = Vector2(1899, 213)
 scale = Vector2(1.735, 1.735)
 
 [node name="Blood Monster_A5" parent="." unique_id=1899325432 instance=ExtResource("4_uw0o6")]
-position = Vector2(2143, 214)
+position = Vector2(1998, 215)
 scale = Vector2(1.735, 1.735)
 
 [node name="Blood Monster_A6" parent="." unique_id=872860570 instance=ExtResource("4_uw0o6")]
-position = Vector2(2289, 211)
+position = Vector2(2133, 215)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A8" parent="." unique_id=45261419 instance=ExtResource("4_uw0o6")]
+position = Vector2(2184, 213)
+scale = Vector2(1.735, 1.735)
+
+[node name="Blood Monster_A9" parent="." unique_id=675693776 instance=ExtResource("4_uw0o6")]
+position = Vector2(2248, 211)
 scale = Vector2(1.735, 1.735)
 
 [node name="Player" parent="." unique_id=248399568 instance=ExtResource("2_28nxo")]
@@ -503,3 +528,9 @@ collision_mask = 1
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone3" unique_id=1725016966]
 position = Vector2(111.5, 3.5)
 shape = SubResource("RectangleShape2D_rqmxw")
+
+[node name="portal3" parent="." unique_id=726366735 instance=ExtResource("7_cyv2j")]
+position = Vector2(6171, 34)
+target_scene_path = "uid://bmj6h8j7vir4"
+
+[editable path="portal3"]

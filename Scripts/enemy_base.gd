@@ -1,5 +1,8 @@
 extends CharacterBody2D
 
+# Preload damage number scene from your Scenes folder
+const DAMAGE_NUMBER_SCENE = preload("res://Scenes/damage_number.tscn")
+
 # Stats
 @export var max_health: int = 50
 var current_health: int
@@ -29,7 +32,6 @@ func _ready() -> void:
 	current_health = max_health
 	add_to_group("enemy")
 
-	# Clean node name (removes numbers added by Godot when duplicating, e.g., "Demon_A2" -> "Demon_A")
 	if anim_prefix.is_empty():
 		var clean_node_name = RegEx.create_from_string("[0-9]+$").sub(name, "")
 		anim_prefix = clean_node_name + "_"
@@ -89,6 +91,13 @@ func take_damage(amount: int = 10) -> void:
 		return
 
 	current_health -= amount
+
+	# Spawn Damage Number above the monster
+	if DAMAGE_NUMBER_SCENE:
+		var dmg_num = DAMAGE_NUMBER_SCENE.instantiate()
+		get_tree().root.add_child(dmg_num)
+		dmg_num.global_position = global_position + Vector2(randf_range(-8, 8), -25)
+		dmg_num.setup(amount, amount >= 18)
 	
 	if current_health <= 0:
 		current_state = State.DEAD
@@ -100,7 +109,7 @@ func take_damage(amount: int = 10) -> void:
 		velocity.x = knockback_dir * 120.0
 		play_enemy_anim("Hurt")
 
-# --- SIGNALS ---
+# --- SIGNALS & HELPERS ---
 
 func _on_detection_area_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player") or body.name.begins_with("Player") or body.name.begins_with("player"):
@@ -141,8 +150,6 @@ func _on_frame_changed() -> void:
 func enable_attack_shapes() -> void:
 	if attack_shape_left: attack_shape_left.disabled = false
 	if attack_shape_right: attack_shape_right.disabled = false
-
-# --- HELPERS ---
 
 func update_facing(dir: float) -> void:
 	if animated_sprite:

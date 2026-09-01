@@ -28,6 +28,10 @@ var current_attack_damage: int = 10
 const LOOK_AHEAD_DISTANCE = 40.0
 const LOOK_AHEAD_SPEED = 3.0
 
+# Screen Shake Variables
+var shake_intensity: float = 0.0
+var shake_decay: float = 15.0
+
 # Respawn & Checkpoint Variables
 var stage_start_position: Vector2 = Vector2.ZERO
 var active_checkpoint: Vector2 = Vector2.ZERO
@@ -141,6 +145,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		is_walking_toggle = !is_walking_toggle
 
 func _physics_process(delta: float) -> void:
+	# --- SCREEN SHAKE PROCESSING ---
+	if shake_intensity > 0.0:
+		shake_intensity = move_toward(shake_intensity, 0.0, shake_decay * delta)
+		camera.offset = Vector2(
+			randf_range(-shake_intensity, shake_intensity),
+			randf_range(-shake_intensity, shake_intensity)
+		)
+
 	if current_state == State.DEAD or is_respawning:
 		return
 
@@ -352,6 +364,7 @@ func handle_dodge_attack_state(delta: float) -> void:
 func handle_plunge_attack_state(_delta: float) -> void:
 	if is_on_floor() and animated_sprite.animation != "dodge atk 3x_merged":
 		play_animation("dodge atk 3x_merged")
+		trigger_hit_impact(6.0, 0.03)
 
 func handle_air_dash_state(_delta: float) -> void:
 	velocity.y = 0
@@ -400,6 +413,8 @@ func handle_heal_state(_delta: float) -> void:
 func take_damage(amount: int = 1, attacker_pos: Vector2 = Vector2.ZERO) -> void:
 	if current_state in [State.HURT, State.DEAD] or invincibility_timer > 0.0 or is_respawning:
 		return
+
+	trigger_hit_impact(5.0, 0.0)
 
 	invincibility_timer = INVINCIBILITY_TIME
 	hurt_timer = HURT_DURATION
@@ -496,6 +511,7 @@ func perform_heavy_attack() -> void:
 	play_animation("3x atk_merged", true)
 	enable_sword_hitbox()
 	combo_step = 0
+	trigger_hit_impact(2.0, 0.0)
 
 func perform_dodge_attack_step() -> void:
 	current_state = State.DODGE_ATTACK
@@ -545,9 +561,22 @@ func _on_sword_hitbox_area_entered(area: Area2D) -> void:
 	_apply_damage_to_target(area)
 	_apply_damage_to_target(area.get_parent())
 
+func trigger_hit_impact(intensity: float = 4.0, freeze_duration: float = 0.05) -> void:
+	shake_intensity = intensity
+
+	if freeze_duration > 0.0:
+		Engine.time_scale = 0.05
+		await get_tree().create_timer(freeze_duration * 0.05, true, false, true).timeout
+		Engine.time_scale = 1.0
+
 func _apply_damage_to_target(target: Node) -> void:
 	if target and target != self and target.has_method("take_damage"):
 		target.take_damage(current_attack_damage)
+		
+		# Scale impact: Light attacks give soft shake/freeze, Heavy hits give a bigger punch
+		var shake = 3.0 if current_attack_damage < 18 else 7.0
+		var freeze = 0.04 if current_attack_damage < 18 else 0.08
+		trigger_hit_impact(shake, freeze)
 
 # --- HELPERS ---
 
