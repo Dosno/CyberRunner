@@ -21,6 +21,14 @@ var invincibility_timer: float = 0.0
 var hurt_timer: float = 0.0
 const HURT_DURATION: float = 0.25
 
+# Heal Cooldown Variables
+const HEAL_COOLDOWN_TIME: float = 5.0
+var heal_cooldown_timer: float = 0.0
+
+# Dash Cooldown Variables
+const DASH_COOLDOWN_TIME: float = 3.0
+var dash_cooldown_timer: float = 0.0
+
 # Attack Damage Variable
 var current_attack_damage: int = 10
 
@@ -30,8 +38,8 @@ const LOOK_AHEAD_SPEED = 3.0
 
 # Menu Camera & Zoom Settings
 var menu_hover_timer: float = 0.0
-const MENU_ZOOM = Vector2(4.5, 4.5)
-const NORMAL_ZOOM = Vector2(3.0, 3.0)
+const MENU_ZOOM = Vector2(4.9, 4.9)
+const NORMAL_ZOOM = Vector2(3.5, 3.5)
 
 # Screen Shake Variables
 var shake_intensity: float = 0.0
@@ -128,8 +136,19 @@ func _ready() -> void:
 	stage_start_position = global_position
 	add_to_group("player")
 	
-	# Start camera zoomed in for the main menu
-	camera.zoom = MENU_ZOOM
+	# Detect active scene file
+	var current_scene_file = ""
+	if get_tree().current_scene:
+		current_scene_file = get_tree().current_scene.scene_file_path.get_file()
+
+	# Only start in MENU state if loading game.tscn
+	if current_scene_file == "game.tscn":
+		current_state = State.MENU
+		camera.zoom = MENU_ZOOM
+	else:
+		current_state = State.NORMAL
+		camera.zoom = NORMAL_ZOOM
+
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 3.0
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
@@ -146,6 +165,9 @@ func _ready() -> void:
 			sword_hitbox.body_entered.connect(_on_sword_hitbox_body_entered)
 		if not sword_hitbox.area_entered.is_connected(_on_sword_hitbox_area_entered):
 			sword_hitbox.area_entered.connect(_on_sword_hitbox_area_entered)
+
+	# Initialize HUD on spawn
+	update_hud_display()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("walk_toggle"):
@@ -167,6 +189,13 @@ func _physics_process(delta: float) -> void:
 
 	if current_state == State.DEAD or is_respawning:
 		return
+
+	# Handle Cooldown Timers
+	if heal_cooldown_timer > 0.0:
+		heal_cooldown_timer -= delta
+
+	if dash_cooldown_timer > 0.0:
+		dash_cooldown_timer -= delta
 
 	# Handle Invincibility Blinking
 	if invincibility_timer > 0.0:
@@ -209,7 +238,8 @@ func _physics_process(delta: float) -> void:
 	# Ground Checks
 	if is_on_floor():
 		can_double_jump = true
-		can_air_dash = true
+		if dash_cooldown_timer <= 0.0:
+			can_air_dash = true
 		coyote_timer = COYOTE_TIME
 	else:
 		coyote_timer -= delta
@@ -265,7 +295,12 @@ func handle_menu_state(delta: float) -> void:
 		start_game_from_menu()
 
 func start_game_from_menu() -> void:
-	# 1. Fade out the CyberRunner logo
+	# 1. Reveal HUD CanvasLayer when entering gameplay
+	var hud = get_tree().root.find_child("HUD", true, false)
+	if hud and hud.has_method("show_hud"):
+		hud.show_hud()
+
+	# 2. Fade out the CyberRunner logo
 	var logo_node = get_node_or_null("../CanvasLayer/CyberRunnerLogo")
 	if not logo_node:
 		logo_node = get_tree().root.find_child("CyberRunnerLogo", true, false)
@@ -273,15 +308,15 @@ func start_game_from_menu() -> void:
 	if logo_node and logo_node.has_method("fade_out_and_hide"):
 		logo_node.fade_out_and_hide()
 
-	# 2. Trigger City Sign banner display on Spacebar press
+	# 3. Trigger City Sign banner display on Spacebar press
 	var city_sign_mgr = get_node_or_null("../CanvasLayer/CitySignManager")
 	if not city_sign_mgr:
 		city_sign_mgr = get_tree().root.find_child("CitySignManager", true, false)
 	
-	if city_sign_mgr and city_sign_mgr.has_method("show_sign"):
-		city_sign_mgr.show_sign("DISTRICT 1")
+	if city_sign_mgr and city_sign_mgr.has_method("show_city"):
+		city_sign_mgr.show_city("AETHEL DUSK")
 
-	# 3. Smoothly zoom out camera to normal gameplay view
+	# 4. Smoothly zoom out camera to normal gameplay view
 	var tween = create_tween().set_parallel(true)
 	tween.tween_property(camera, "zoom", NORMAL_ZOOM, 1.2)\
 		.set_trans(Tween.TRANS_SINE)\
@@ -296,7 +331,8 @@ func start_game_from_menu() -> void:
 # --- STATE HANDLERS ---
 
 func handle_normal_state(delta: float) -> void:
-	if InputMap.has_action("heal") and Input.is_action_just_pressed("heal") and is_on_floor():
+	# Trigger Heal State via Input 'heal' (E key) when damaged, grounded, and off cooldown
+	if InputMap.has_action("heal") and Input.is_action_just_pressed("heal") and is_on_floor() and current_health < max_health and heal_cooldown_timer <= 0.0:
 		change_state(State.HEAL)
 		return
 
@@ -312,7 +348,7 @@ func handle_normal_state(delta: float) -> void:
 		change_state(State.CROUCH)
 		return
 
-	if Input.is_action_just_pressed("dodge") and not is_on_floor() and can_air_dash:
+	if Input.is_action_just_pressed("dodge") and not is_on_floor() and can_air_dash and dash_cooldown_timer <= 0.0:
 		change_state(State.AIR_DASH)
 		return
 
@@ -466,8 +502,13 @@ func handle_ladder_state(_delta: float) -> void:
 func handle_hurt_state(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0, WALK_SPEED * 6.0 * delta)
 
-func handle_heal_state(_delta: float) -> void:
-	velocity.x = 0
+func handle_heal_state(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0, WALK_SPEED * 4.0 * delta)
+
+func update_hud_display() -> void:
+	var hud = get_tree().root.find_child("HUD", true, false)
+	if hud and hud.has_method("update_health_display"):
+		hud.update_health_display(current_health)
 
 func take_damage(amount: int = 1, attacker_pos: Vector2 = Vector2.ZERO) -> void:
 	if current_state in [State.HURT, State.DEAD] or invincibility_timer > 0.0 or is_respawning:
@@ -479,6 +520,9 @@ func take_damage(amount: int = 1, attacker_pos: Vector2 = Vector2.ZERO) -> void:
 	hurt_timer = HURT_DURATION
 	current_health -= amount
 	
+	# Keep HUD updated
+	update_hud_display()
+
 	if current_health <= 0:
 		current_state = State.DEAD
 		velocity = Vector2.ZERO
@@ -524,6 +568,9 @@ func start_death_respawn_sequence() -> void:
 
 	velocity = Vector2.ZERO
 	current_health = max_health
+	heal_cooldown_timer = 0.0
+	dash_cooldown_timer = 0.0
+	update_hud_display()
 
 	# 3. Fade screen back to Transparent
 	if fade_rect:
@@ -686,6 +733,7 @@ func change_state(new_state: State) -> void:
 
 		State.AIR_DASH:
 			can_air_dash = false
+			dash_cooldown_timer = DASH_COOLDOWN_TIME # Start 3-second dash cooldown
 			play_animation("aerial_dash")
 			
 			if dash_fx_sprite:
@@ -714,7 +762,14 @@ func change_state(new_state: State) -> void:
 func _on_animation_finished() -> void:
 	disable_sword_hitbox()
 
-	if current_state == State.ATTACK:
+	if current_state == State.HEAL:
+		if current_health < max_health:
+			current_health = min(current_health + 1, max_health)
+			update_hud_display()
+		# Start 5-second cooldown timer after heal finishes
+		heal_cooldown_timer = HEAL_COOLDOWN_TIME
+		change_state(State.NORMAL)
+	elif current_state == State.ATTACK:
 		if attack_buffered_light:
 			perform_light_attack_step()
 		else:
@@ -724,7 +779,7 @@ func _on_animation_finished() -> void:
 			perform_dodge_attack_step()
 		else:
 			change_state(State.NORMAL)
-	elif current_state in [State.HURT, State.DODGE, State.AIR_ATTACK, State.PLUNGE_ATTACK, State.SLIDE, State.AIR_DASH, State.HEAL]:
+	elif current_state in [State.HURT, State.DODGE, State.AIR_ATTACK, State.PLUNGE_ATTACK, State.SLIDE, State.AIR_DASH]:
 		change_state(State.NORMAL)
 	elif current_state == State.CROUCH and exiting_crouch:
 		exiting_crouch = false

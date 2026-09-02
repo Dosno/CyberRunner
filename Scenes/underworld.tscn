@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://di0ibdd0xk3sf" path="res://Scenes/blood_monster_a.tscn" id="4_uw0o6"]
 [ext_resource type="PackedScene" uid="uid://dhdpgukqk811l" path="res://Scenes/Demon_A.tscn" id="5_5t5tt"]
 [ext_resource type="PackedScene" uid="uid://leimblun6a42" path="res://Scenes/killzone.tscn" id="6_5t5tt"]
-[ext_resource type="PackedScene" uid="uid://cce23c3g6b1m8" path="res://Scenes/portal_2.tscn" id="7_cyv2j"]
+[ext_resource type="PackedScene" uid="uid://cdvvw0br70ckl" path="res://Scenes/hud.tscn" id="8_rqmxw"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_28nxo"]
 texture = ExtResource("1_4g2wi")
@@ -309,10 +309,7 @@ _data = {
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cyv2j"]
-size = Vector2(6817, 63)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_rqmxw"]
-size = Vector2(243, 13)
+size = Vector2(10131.5, 41)
 
 [node name="Underworld" type="Node2D" unique_id=1617283129]
 
@@ -506,31 +503,11 @@ color = Color(0, 0, 0, 1)
 position = Vector2(8, 448)
 
 [node name="Killzone" parent="Killzones" unique_id=133367386 instance=ExtResource("6_5t5tt")]
-position = Vector2(-168, 207)
+position = Vector2(-192, 243)
 collision_mask = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone" unique_id=1077813028]
-position = Vector2(-197, -298)
+position = Vector2(1460.25, -203.5)
 shape = SubResource("RectangleShape2D_cyv2j")
 
-[node name="Killzone2" parent="Killzones" unique_id=970091164 instance=ExtResource("6_5t5tt")]
-position = Vector2(2992, -91)
-collision_mask = 1
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone2" unique_id=1370250478]
-position = Vector2(3287.5, -4)
-shape = SubResource("RectangleShape2D_cyv2j")
-
-[node name="Killzone3" parent="Killzones" unique_id=1741964046 instance=ExtResource("6_5t5tt")]
-position = Vector2(7658, -233)
-collision_mask = 1
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Killzones/Killzone3" unique_id=1725016966]
-position = Vector2(111.5, 3.5)
-shape = SubResource("RectangleShape2D_rqmxw")
-
-[node name="portal3" parent="." unique_id=726366735 instance=ExtResource("7_cyv2j")]
-position = Vector2(6171, 34)
-target_scene_path = "uid://bmj6h8j7vir4"
-
-[editable path="portal3"]
+[node name="HUD" parent="." unique_id=32716007 instance=ExtResource("8_rqmxw")]

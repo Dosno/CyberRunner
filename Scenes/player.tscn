@@ -4406,8 +4406,9 @@ shape = SubResource("RectangleShape2D_mokdk")
 position = Vector2(60, 0)
 
 [node name="CollisionShapeRight" type="CollisionShape2D" parent="Hitbox" unique_id=796430386]
+position = Vector2(-25, 0)
 shape = SubResource("RectangleShape2D_8wyap")
 
 [node name="CollisionShapeLeft" type="CollisionShape2D" parent="Hitbox" unique_id=1513776021]
-position = Vector2(-119, -2)
+position = Vector2(-90, 1)
 shape = SubResource("RectangleShape2D_8wyap")
