@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bubxgskttmwf0"]
+
+[ext_resource type="Script" uid="uid://ppfxww81fd48" path="res://Scripts/cyber_runner_logo.gd" id="1_ejutx"]
+[ext_resource type="Texture2D" uid="uid://bm70wpbewxitx" path="res://Assets/asset/CyberRunnerLogo.png" id="1_jfpqs"]
+
+[node name="CyberRunnerLogo" type="Control" unique_id=572415634]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 88.0
+offset_top = 71.0
+offset_right = 88.0
+offset_bottom = 71.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ejutx")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1587270830]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_jfpqs")

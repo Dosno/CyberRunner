@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://cge2ov70nx1do" path="res://Assets/bigger_moving_platform.tscn" id="10_ldgsr"]
 [ext_resource type="PackedScene" uid="uid://leimblun6a42" path="res://Scenes/killzone.tscn" id="14_1phco"]
 [ext_resource type="PackedScene" uid="uid://duydpoluq6rre" path="res://Scenes/Spike_Trap.tscn" id="15_nb51f"]
+[ext_resource type="PackedScene" uid="uid://bubxgskttmwf0" path="res://Scenes/cyber_runner_logo.tscn" id="18_85qyi"]
 [ext_resource type="PackedScene" uid="uid://cce23c3g6b1m8" path="res://Scenes/portal_2.tscn" id="19_iivbl"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1phco"]
@@ -1249,7 +1250,7 @@ tile_map_data = PackedByteArray("AADHAPD/AAAAAAAAAADIAPD/AAABAAAAAADJAPD/AAACAAA
 tile_set = SubResource("TileSet_8wyap")
 
 [node name="Player" parent="." unique_id=248399568 instance=ExtResource("1_ebmjs")]
-position = Vector2(49, -409)
+position = Vector2(199, -315)
 
 [node name="Level1 Moving Platform" parent="." unique_id=270497472 instance=ExtResource("4_3dryh")]
 position = Vector2(1125, -263)
@@ -1394,6 +1395,13 @@ scale = Vector2(0.70749956, 1.7343748)
 
 [node name="CollisionShape2D" parent="Portal2" index="1" unique_id=814898644]
 position = Vector2(-22, 9)
+
+[node name="CyberRunnerLogo" parent="." unique_id=572415634 instance=ExtResource("18_85qyi")]
+offset_left = 14.000015
+offset_top = -416.0
+offset_right = 14.000015
+offset_bottom = -416.0
+scale = Vector2(0.09764427, 0.08575223)
 
 [editable path="Player"]
 [editable path="Portals/Portal"]

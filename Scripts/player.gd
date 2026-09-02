@@ -28,6 +28,11 @@ var current_attack_damage: int = 10
 const LOOK_AHEAD_DISTANCE = 40.0
 const LOOK_AHEAD_SPEED = 3.0
 
+# Menu Camera & Zoom Settings
+var menu_hover_timer: float = 0.0
+const MENU_ZOOM = Vector2(4.5, 4.5)
+const NORMAL_ZOOM = Vector2(3.0, 3.0)
+
 # Screen Shake Variables
 var shake_intensity: float = 0.0
 var shake_decay: float = 15.0
@@ -80,10 +85,10 @@ const ANIM_OFFSETS: Dictionary = {
 
 # State Machine
 enum State {
-	NORMAL, CROUCH, SLIDE, ATTACK, DODGE, AIR_ATTACK, DODGE_ATTACK,
+	MENU, NORMAL, CROUCH, SLIDE, ATTACK, DODGE, AIR_ATTACK, DODGE_ATTACK,
 	PLUNGE_ATTACK, AIR_DASH, WALL_SLIDE, LEDGE_HANG, LADDER, HURT, HEAL, DEAD
 }
-var current_state: State = State.NORMAL
+var current_state: State = State.MENU
 
 var is_walking_toggle: bool = false
 var exiting_crouch: bool = false
@@ -123,8 +128,10 @@ func _ready() -> void:
 	stage_start_position = global_position
 	add_to_group("player")
 	
+	# Start camera zoomed in for the main menu
+	camera.zoom = MENU_ZOOM
 	camera.position_smoothing_enabled = true
-	camera.position_smoothing_speed = 5.0
+	camera.position_smoothing_speed = 3.0
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	
 	floor_snap_length = 8.0
@@ -145,6 +152,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		is_walking_toggle = !is_walking_toggle
 
 func _physics_process(delta: float) -> void:
+	# --- MAIN MENU STATE OVERRIDE ---
+	if current_state == State.MENU:
+		handle_menu_state(delta)
+		return
+
 	# --- SCREEN SHAKE PROCESSING ---
 	if shake_intensity > 0.0:
 		shake_intensity = move_toward(shake_intensity, 0.0, shake_decay * delta)
@@ -233,6 +245,53 @@ func _physics_process(delta: float) -> void:
 			handle_heal_state(delta)
 
 	move_and_slide()
+
+# --- MAIN MENU ROUTINES ---
+
+func handle_menu_state(delta: float) -> void:
+	play_animation("idle")
+	velocity = Vector2.ZERO
+
+	# Camera hover sway around player
+	menu_hover_timer += delta * 1.5
+	var hover_offset = Vector2(
+		cos(menu_hover_timer) * 15.0,
+		sin(menu_hover_timer * 0.8) * 10.0
+	)
+	camera.offset = camera.offset.lerp(hover_offset, 2.0 * delta)
+
+	# Press Spacebar to Start Game
+	if Input.is_action_just_pressed("ui_accept"):
+		start_game_from_menu()
+
+func start_game_from_menu() -> void:
+	# 1. Fade out the CyberRunner logo
+	var logo_node = get_node_or_null("../CanvasLayer/CyberRunnerLogo")
+	if not logo_node:
+		logo_node = get_tree().root.find_child("CyberRunnerLogo", true, false)
+	
+	if logo_node and logo_node.has_method("fade_out_and_hide"):
+		logo_node.fade_out_and_hide()
+
+	# 2. Trigger City Sign banner display on Spacebar press
+	var city_sign_mgr = get_node_or_null("../CanvasLayer/CitySignManager")
+	if not city_sign_mgr:
+		city_sign_mgr = get_tree().root.find_child("CitySignManager", true, false)
+	
+	if city_sign_mgr and city_sign_mgr.has_method("show_sign"):
+		city_sign_mgr.show_sign("DISTRICT 1")
+
+	# 3. Smoothly zoom out camera to normal gameplay view
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(camera, "zoom", NORMAL_ZOOM, 1.2)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(camera, "offset", Vector2.ZERO, 1.2)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_OUT)
+
+	await tween.finished
+	change_state(State.NORMAL)
 
 # --- STATE HANDLERS ---
 
@@ -457,7 +516,7 @@ func start_death_respawn_sequence() -> void:
 	else:
 		await get_tree().create_timer(1.2).timeout
 
-	# 2. Respawn at active Portal Checkpoint (or fall back to Stage Start)
+	# 2. Respawn at active Portal Checkpoint
 	if has_checkpoint:
 		global_position = active_checkpoint
 	else:
@@ -471,7 +530,7 @@ func start_death_respawn_sequence() -> void:
 		var tween_in = create_tween()
 		tween_in.tween_property(fade_rect, "modulate:a", 0.0, 0.8)
 
-	# 4. Perform 5 Character Blinks
+	# 4. Perform Character Blinks
 	for i in range(5):
 		animated_sprite.visible = false
 		await get_tree().create_timer(0.12).timeout
@@ -481,7 +540,7 @@ func start_death_respawn_sequence() -> void:
 	is_respawning = false
 	change_state(State.NORMAL)
 
-# --- ATTACK ROUTINES & DAMAGE SCALING ---
+# --- ATTACK ROUTINES ---
 
 func perform_light_attack_step() -> void:
 	current_state = State.ATTACK
@@ -572,8 +631,6 @@ func trigger_hit_impact(intensity: float = 4.0, freeze_duration: float = 0.05) -
 func _apply_damage_to_target(target: Node) -> void:
 	if target and target != self and target.has_method("take_damage"):
 		target.take_damage(current_attack_damage)
-		
-		# Scale impact: Light attacks give soft shake/freeze, Heavy hits give a bigger punch
 		var shake = 3.0 if current_attack_damage < 18 else 7.0
 		var freeze = 0.04 if current_attack_damage < 18 else 0.08
 		trigger_hit_impact(shake, freeze)
