@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwncp7hmw1j2t"
-path="res://.godot/imported/UNDERWORLD.png-93bdf4f6555147ea8a5cbe9c1f9446cb.ctex"
+uid="uid://nfe0wip6n8hh"
+path="res://.godot/imported/1.png-2d77091c95b5f3103cd58c236c7cd079.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/CitySigns/UNDERWORLD.png"
-dest_files=["res://.godot/imported/UNDERWORLD.png-93bdf4f6555147ea8a5cbe9c1f9446cb.ctex"]
+source_file="res://Assets/New folder/city 1/1.png"
+dest_files=["res://.godot/imported/1.png-2d77091c95b5f3103cd58c236c7cd079.ctex"]
 
 [params]
 
