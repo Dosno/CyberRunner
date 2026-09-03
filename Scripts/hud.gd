@@ -6,9 +6,15 @@ extends Control
 var canvas_layer: CanvasLayer
 var low_hp_rect: ColorRect
 var heal_flash_rect: ColorRect
-var speed_lines_rect: ColorRect
 var fade_rect: ColorRect
 var last_health: int = -1
+
+# Objective UI Inspector Controls
+@export var objective_position: Vector2 = Vector2(0, 80) # Adjust X and Y in Inspector
+@export var objective_font_size: int = 16
+
+# Objective Popup Reference
+var objective_label: Label
 
 # Dynamic Low HP FX Variables
 var heart_pulse_timer: float = 0.0
@@ -41,6 +47,9 @@ func _ready() -> void:
 
 	# 4. Setup Cooldown Indicators
 	setup_cooldown_ui()
+
+	# 5. Setup Objective Label Banner
+	setup_objective_ui()
 
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
@@ -110,21 +119,7 @@ func setup_screen_fx_overlays() -> void:
 	low_hp_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas_layer.add_child(low_hp_rect)
 
-	# 2. Speed Lines FX Overlay Shader
-	speed_lines_rect = ColorRect.new()
-	speed_lines_rect.name = "SpeedLinesOverlay"
-	speed_lines_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	speed_lines_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
-	var shader = load("res://Shaders/speed_lines.gdshader")
-	if shader:
-		var mat = ShaderMaterial.new()
-		mat.shader = shader
-		mat.set_shader_parameter("intensity", 0.0)
-		speed_lines_rect.material = mat
-	canvas_layer.add_child(speed_lines_rect)
-
-	# 3. Heal Accent Flash Overlay
+	# 2. Heal Accent Flash Overlay
 	heal_flash_rect = ColorRect.new()
 	heal_flash_rect.name = "HealFlashOverlay"
 	heal_flash_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -132,7 +127,7 @@ func setup_screen_fx_overlays() -> void:
 	heal_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas_layer.add_child(heal_flash_rect)
 
-	# 4. Global Scene FadeRect Overlay
+	# 3. Global Scene FadeRect Overlay
 	fade_rect = ColorRect.new()
 	fade_rect.name = "FadeRect"
 	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -182,18 +177,45 @@ func setup_cooldown_ui() -> void:
 	margin.add_child(dash_wrapper)
 	cd_container.add_child(margin)
 
-# --- TRANSITION & FX FUNCTIONS ---
-
-func trigger_speed_lines_burst(duration: float = 1.0) -> void:
-	if not speed_lines_rect or not speed_lines_rect.material:
-		return
-	var mat = speed_lines_rect.material as ShaderMaterial
+func setup_objective_ui() -> void:
+	objective_label = Label.new()
+	objective_label.name = "ObjectiveLabel"
+	objective_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	objective_label.position = objective_position
+	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	objective_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	objective_label.add_theme_font_size_override("font_size", objective_font_size)
 	
+	# Pure Solid White Text
+	objective_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
+	objective_label.visible = false
+	canvas_layer.add_child(objective_label)
+
+func show_objective(text_msg: String, duration: float = 4.0, show_prefix: bool = true) -> void:
+	if not objective_label:
+		return
+
+	if show_prefix:
+		objective_label.text = "OBJECTIVE: " + text_msg
+	else:
+		objective_label.text = text_msg
+
+	objective_label.position = objective_position
+	objective_label.visible = true
+	objective_label.modulate.a = 0.0
+
 	var tween = create_tween()
-	mat.set_shader_parameter("intensity", 1.0)
-	tween.tween_property(mat, "shader_parameter/intensity", 0.0, duration)\
-		.set_trans(Tween.TRANS_QUAD)\
+	tween.tween_property(objective_label, "modulate:a", 1.0, 0.5)\
+		.set_trans(Tween.TRANS_SINE)\
 		.set_ease(Tween.EASE_OUT)
+	tween.tween_interval(duration)
+	tween.tween_property(objective_label, "modulate:a", 0.0, 0.5)\
+		.set_trans(Tween.TRANS_SINE)\
+		.set_ease(Tween.EASE_IN)
+	await tween.finished
+	objective_label.visible = false
+
+# --- TRANSITION & FX FUNCTIONS ---
 
 func fade_in_from_black(duration: float = 0.8) -> void:
 	if not fade_rect:

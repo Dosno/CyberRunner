@@ -328,6 +328,10 @@ func start_game_from_menu() -> void:
 	await tween.finished
 	change_state(State.NORMAL)
 
+	# 5. Trigger Objective Banner (White text, custom positioning)
+	if hud and hud.has_method("show_objective"):
+		hud.show_objective("REACH THE LAST PORTAL TO ESCAPE", 4.0)
+
 # --- STATE HANDLERS ---
 
 func handle_normal_state(delta: float) -> void:

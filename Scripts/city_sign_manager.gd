@@ -5,20 +5,21 @@ extends CanvasLayer
 var city_signs = {
 	"AETHEL DUSK": preload("res://Assets/CitySigns/Aethel_dusk_sign.png"),
 	"NOX TOKYO": preload("res://Assets/CitySigns/Nox_tokyo_sign.png"),
-	"AETHER GLOW": preload("res://Assets/CitySigns/Aether_glow_sign.png")
+	"AETHER GLOW": preload("res://Assets/CitySigns/Aether_glow_sign.png"),
+	#"UNDERWORLD": preload("res://Assets/CitySigns/UNDERWORLD.png")
 }
 
 func _enter_tree() -> void:
-	# Hide immediately as soon as node enters scene tree
 	visible = false
 
 func _ready() -> void:
+	add_to_group("city_sign_manager")
 	visible = false
 	if city_sign:
 		city_sign.visible = false
 		city_sign.modulate.a = 0.0
 
-func show_city(city_name: String) -> void:
+func show_city(city_name: String, duration: float = 3.5) -> void:
 	if not city_sign:
 		return
 
@@ -26,7 +27,6 @@ func show_city(city_name: String) -> void:
 		print("City sign not found: ", city_name)
 		return
 
-	# Enable visibility only when explicitly requested
 	visible = true
 	city_sign.texture = city_signs[city_name]
 	city_sign.modulate.a = 0.0
@@ -40,8 +40,8 @@ func show_city(city_name: String) -> void:
 
 	await fade_in.finished
 
-	# Display Hold
-	await get_tree().create_timer(1.5).timeout
+	# Display Hold (Now uses the duration parameter!)
+	await get_tree().create_timer(duration).timeout
 
 	# Fade Out
 	var fade_out := create_tween()
