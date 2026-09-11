@@ -305,6 +305,15 @@ func start_game_from_menu() -> void:
 	var hud = get_tree().root.find_child("HUD", true, false)
 	if hud and hud.has_method("show_hud"):
 		hud.show_hud()
+	# Reveal the '!' icon on the mailbox
+	var mailbox = get_node_or_null("../MailboxArea")
+	if not mailbox:
+		mailbox = get_tree().root.find_child("MailboxArea", true, false)
+	
+	if mailbox and mailbox.has_method("enable_mailbox_indicator"):
+		mailbox.enable_mailbox_indicator()
+
+	# ... (your existing HUD, logo fade, and camera zoom code)
 
 	# 2. Fade out the CyberRunner logo
 	var logo_node = get_node_or_null("../CanvasLayer/CyberRunnerLogo")

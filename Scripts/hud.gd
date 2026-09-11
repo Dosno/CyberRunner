@@ -10,10 +10,11 @@ var fade_rect: ColorRect
 var last_health: int = -1
 
 # Objective UI Inspector Controls
-@export var objective_position: Vector2 = Vector2(0, 80) # Adjust X and Y in Inspector
+@export var objective_position: Vector2 = Vector2(0, 40) # Adjust Y position from top
 @export var objective_font_size: int = 16
 
-# Objective Popup Reference
+# Objective UI References
+var objective_panel: PanelContainer
 var objective_label: Label
 
 # Dynamic Low HP FX Variables
@@ -34,16 +35,8 @@ func _ready() -> void:
 	# 2. Setup Screen FX Overlays
 	setup_screen_fx_overlays()
 
-	# 3. Setup Health Bar Positioning
-	if not health_bar:
-		health_bar = HBoxContainer.new()
-		health_bar.name = "HealthBar"
-		health_bar.position = Vector2(20, 20)
-		canvas_layer.add_child(health_bar)
-	else:
-		health_bar.get_parent().remove_child(health_bar)
-		canvas_layer.add_child(health_bar)
-		health_bar.position = Vector2(20, 20)
+	# 3. Setup Health Bar & Top-Left Background Card
+	setup_top_left_hud()
 
 	# 4. Setup Cooldown Indicators
 	setup_cooldown_ui()
@@ -131,22 +124,50 @@ func setup_screen_fx_overlays() -> void:
 	fade_rect = ColorRect.new()
 	fade_rect.name = "FadeRect"
 	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	fade_rect.color = Color(0.0, 0.0, 0.0, 0.0) # Start transparent
+	fade_rect.color = Color(0.0, 0.0, 0.0, 0.0)
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas_layer.add_child(fade_rect)
 
+func setup_top_left_hud() -> void:
+	var hud_bg = PanelContainer.new()
+	hud_bg.name = "HUDBGPanel"
+	hud_bg.position = Vector2(12, 12)
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.0, 0.0, 0.0, 0.65)
+	style.set_corner_radius_all(6)
+	style.set_expand_margin_all(8)
+	hud_bg.add_theme_stylebox_override("panel", style)
+	
+	canvas_layer.add_child(hud_bg)
+
+	var hud_stack = VBoxContainer.new()
+	hud_stack.name = "HUDStack"
+	hud_bg.add_child(hud_stack)
+
+	if not health_bar:
+		health_bar = HBoxContainer.new()
+		health_bar.name = "HealthBar"
+	else:
+		if health_bar.get_parent():
+			health_bar.get_parent().remove_child(health_bar)
+
+	hud_stack.add_child(health_bar)
+
 func setup_cooldown_ui() -> void:
+	var hud_stack = canvas_layer.get_node_or_null("HUDBGPanel/HUDStack")
+	
 	var cd_container = HBoxContainer.new()
 	cd_container.name = "CooldownContainer"
-	cd_container.position = Vector2(20, 52)
-	canvas_layer.add_child(cd_container)
 
 	# Heal Cooldown Bar
 	var heal_wrapper = VBoxContainer.new()
 	var heal_label = Label.new()
 	heal_label.text = "[E] HEAL"
 	heal_label.add_theme_font_size_override("font_size", 10)
-	heal_label.modulate = Color(0.8, 0.8, 0.8)
+	heal_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	heal_label.add_theme_constant_override("outline_size", 4)
+	heal_label.modulate = Color(0.9, 0.9, 0.9)
 
 	heal_cd_bar = ProgressBar.new()
 	heal_cd_bar.custom_minimum_size = Vector2(80, 6)
@@ -165,7 +186,9 @@ func setup_cooldown_ui() -> void:
 	var dash_label = Label.new()
 	dash_label.text = "DASH"
 	dash_label.add_theme_font_size_override("font_size", 10)
-	dash_label.modulate = Color(0.8, 0.8, 0.8)
+	dash_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	dash_label.add_theme_constant_override("outline_size", 4)
+	dash_label.modulate = Color(0.9, 0.9, 0.9)
 
 	dash_cd_bar = ProgressBar.new()
 	dash_cd_bar.custom_minimum_size = Vector2(60, 6)
@@ -177,22 +200,55 @@ func setup_cooldown_ui() -> void:
 	margin.add_child(dash_wrapper)
 	cd_container.add_child(margin)
 
+	if hud_stack:
+		hud_stack.add_child(cd_container)
+
 func setup_objective_ui() -> void:
+	# Center alignment container for the objective pill
+	var objective_container = CenterContainer.new()
+	objective_container.name = "ObjectiveContainer"
+	objective_container.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	objective_container.position.y = objective_position.y
+	objective_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Compact Pill-Shaped Background Badge
+	objective_panel = PanelContainer.new()
+	objective_panel.name = "ObjectivePanel"
+	
+	var panel_style = StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.0, 0.0, 0.0, 0.75)
+	panel_style.set_corner_radius_all(8)
+	panel_style.content_margin_left = 20
+	panel_style.content_margin_right = 20
+	panel_style.content_margin_top = 6
+	panel_style.content_margin_bottom = 6
+	
+	objective_panel.add_theme_stylebox_override("panel", panel_style)
+	objective_container.add_child(objective_panel)
+
+	# Label with Outline & Drop Shadow
 	objective_label = Label.new()
 	objective_label.name = "ObjectiveLabel"
-	objective_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	objective_label.position = objective_position
 	objective_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	objective_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	objective_label.add_theme_font_size_override("font_size", objective_font_size)
 	
-	# Pure Solid White Text
-	objective_label.modulate = Color(1.0, 1.0, 1.0, 0.0)
-	objective_label.visible = false
-	canvas_layer.add_child(objective_label)
+	objective_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	objective_label.add_theme_constant_override("outline_size", 4)
+	objective_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.6))
+	objective_label.add_theme_constant_override("shadow_offset_x", 1)
+	objective_label.add_theme_constant_override("shadow_offset_y", 1)
+	
+	objective_panel.add_child(objective_label)
+
+	# Start hidden
+	objective_container.modulate.a = 0.0
+	objective_container.visible = false
+	canvas_layer.add_child(objective_container)
 
 func show_objective(text_msg: String, duration: float = 4.0, show_prefix: bool = true) -> void:
-	if not objective_label:
+	var container = canvas_layer.get_node_or_null("ObjectiveContainer")
+	if not objective_label or not container:
 		return
 
 	if show_prefix:
@@ -200,27 +256,26 @@ func show_objective(text_msg: String, duration: float = 4.0, show_prefix: bool =
 	else:
 		objective_label.text = text_msg
 
-	objective_label.position = objective_position
-	objective_label.visible = true
-	objective_label.modulate.a = 0.0
+	container.visible = true
+	container.modulate.a = 0.0
 
 	var tween = create_tween()
-	tween.tween_property(objective_label, "modulate:a", 1.0, 0.5)\
+	tween.tween_property(container, "modulate:a", 1.0, 0.4)\
 		.set_trans(Tween.TRANS_SINE)\
 		.set_ease(Tween.EASE_OUT)
 	tween.tween_interval(duration)
-	tween.tween_property(objective_label, "modulate:a", 0.0, 0.5)\
+	tween.tween_property(container, "modulate:a", 0.0, 0.4)\
 		.set_trans(Tween.TRANS_SINE)\
 		.set_ease(Tween.EASE_IN)
 	await tween.finished
-	objective_label.visible = false
+	container.visible = false
 
 # --- TRANSITION & FX FUNCTIONS ---
 
 func fade_in_from_black(duration: float = 0.8) -> void:
 	if not fade_rect:
 		return
-	fade_rect.color.a = 1.0 # Force full black
+	fade_rect.color.a = 1.0
 	var tween = create_tween()
 	tween.tween_property(fade_rect, "color:a", 0.0, duration)\
 		.set_trans(Tween.TRANS_SINE)\

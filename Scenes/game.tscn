@@ -30,6 +30,7 @@
 [ext_resource type="Texture2D" uid="uid://etemwbbsmnyg" path="res://Assets/New folder/city 6/4.png" id="21_6uxt2"]
 [ext_resource type="Texture2D" uid="uid://dk1h0ik8aq8ah" path="res://Assets/New folder/city 6/5.png" id="22_ym3tv"]
 [ext_resource type="Texture2D" uid="uid://uu5ptdcucewy" path="res://Assets/New folder/city 6/6.png" id="23_bwj6o"]
+[ext_resource type="Script" uid="uid://bvi4bkq2mq7oq" path="res://Scripts/mailbox_area.gd" id="31_8m3t6"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v158k"]
 texture = ExtResource("2_i6g32")
@@ -962,6 +963,16 @@ texture = ExtResource("2_qxrlw")
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_3dryh")
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8wyap"]
+size = Vector2(88, 42.5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mokdk"]
+bg_color = Color(0, 0, 0, 0.7058824)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="Animation" id="Animation_i6g32"]
 resource_name = "Move"
 length = 2.0
@@ -1447,6 +1458,63 @@ tile_set = SubResource("TileSet_8wyap")
 [node name="Player" parent="." unique_id=248399568 instance=ExtResource("1_ebmjs")]
 position = Vector2(198, -315)
 
+[node name="MailboxArea" type="Area2D" parent="." unique_id=2010837676]
+script = ExtResource("31_8m3t6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MailboxArea" unique_id=1839376983]
+position = Vector2(46, -280.25)
+shape = SubResource("RectangleShape2D_8wyap")
+
+[node name="PromptIcon" type="Label" parent="MailboxArea" unique_id=1814926018]
+offset_left = 46.0
+offset_top = -338.0
+offset_right = 86.0
+offset_bottom = -304.0
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 24
+text = "!"
+
+[node name="HUD" parent="." unique_id=32716007 instance=ExtResource("19_7nbq1")]
+objective_position = Vector2(0, 30)
+
+[node name="ControlCanvas" type="CanvasLayer" parent="." unique_id=416745587]
+
+[node name="ControlsPanel" type="PanelContainer" parent="ControlCanvas" unique_id=1214179545]
+visible = false
+custom_minimum_size = Vector2(300, 200)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mokdk")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ControlCanvas/ControlsPanel" unique_id=1238911872]
+layout_mode = 2
+bbcode_enabled = true
+text = "[center][font_size=14][b][color=#ffcc00]-- GAME CONTROLS --[/color][/b][/font_size]
+
+[color=#ffffff][b]Movement[/b] - A / D
+[b]Jump[/b] - Spacebar
+[b]Walk/Run[/b] - Left Alt
+[b]Crouch[/b] - C
+[b]Slide[/b] - Left Ctrl
+
+[color=#ffcc00][b]COMBAT[/b][/color]
+[b]Light Attack[/b] - Left Click
+[b]Heavy Attack[/b] - Right Click
+[b]Air Dash[/b] - Spacebar + Left Shift
+[b]Dodge[/b] - Left Shift
+[b]Dodge Atk[/b]- Left Shift + M1
+[b]Heal[/b] - E[/color][/center]"
+fit_content = true
+
 [node name="Level1 Moving Platform" parent="." unique_id=270497472 instance=ExtResource("4_3dryh")]
 position = Vector2(1125, -263)
 
@@ -1603,10 +1671,8 @@ scale = Vector2(0.09764427, 0.08575223)
 prompt_offset = Vector2(590, 900)
 credits_offset = Vector2(640, 1000)
 
-[node name="HUD" parent="." unique_id=32716007 instance=ExtResource("19_7nbq1")]
-objective_position = Vector2(0, 30)
-
 [editable path="Player"]
+[editable path="HUD"]
 [editable path="Portals/Portal"]
 [editable path="Portals/Portal2"]
 [editable path="Portal2"]
