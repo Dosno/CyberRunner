@@ -141,13 +141,19 @@ func _ready() -> void:
 	if get_tree().current_scene:
 		current_scene_file = get_tree().current_scene.scene_file_path.get_file()
 
-	# Only start in MENU state if loading game.tscn
+	# Handle scene-specific camera and state configurations
 	if current_scene_file == "game.tscn":
 		current_state = State.MENU
 		camera.zoom = MENU_ZOOM
+		camera.limit_bottom = 10000000
+	elif current_scene_file == "underworld.tscn":
+		current_state = State.NORMAL
+		camera.zoom = NORMAL_ZOOM
+		camera.limit_bottom = 186 # Clamps camera at the street line
 	else:
 		current_state = State.NORMAL
 		camera.zoom = NORMAL_ZOOM
+		camera.limit_bottom = 10000000
 
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 3.0
@@ -222,7 +228,7 @@ func _physics_process(delta: float) -> void:
 		if current_state != State.DODGE_ATTACK:
 			dodge_combo_step = 0
 
-	# Input Buffering
+	# Input Buffering & Instant Combo Cancel (Light -> Heavy)
 	if current_state in [State.ATTACK, State.DODGE_ATTACK]:
 		if Input.is_action_just_pressed("attack_heavy"):
 			perform_heavy_attack()
@@ -328,14 +334,13 @@ func start_game_from_menu() -> void:
 	await tween.finished
 	change_state(State.NORMAL)
 
-	# 5. Trigger Objective Banner (White text, custom positioning)
+	# 5. Trigger Objective Banner
 	if hud and hud.has_method("show_objective"):
 		hud.show_objective("REACH THE LAST PORTAL TO ESCAPE", 4.0)
 
 # --- STATE HANDLERS ---
 
 func handle_normal_state(delta: float) -> void:
-	# Trigger Heal State via Input 'heal' (E key) when damaged, grounded, and off cooldown
 	if InputMap.has_action("heal") and Input.is_action_just_pressed("heal") and is_on_floor() and current_health < max_health and heal_cooldown_timer <= 0.0:
 		change_state(State.HEAL)
 		return
@@ -524,7 +529,6 @@ func take_damage(amount: int = 1, attacker_pos: Vector2 = Vector2.ZERO) -> void:
 	hurt_timer = HURT_DURATION
 	current_health -= amount
 	
-	# Keep HUD updated
 	update_hud_display()
 
 	if current_health <= 0:
@@ -556,7 +560,6 @@ func start_death_respawn_sequence() -> void:
 	if not fade_rect:
 		fade_rect = get_tree().root.find_child("FadeRect", true, false)
 
-	# 1. Fade screen to Black
 	if fade_rect:
 		var tween = create_tween()
 		tween.tween_property(fade_rect, "modulate:a", 1.0, 1.2)
@@ -564,7 +567,6 @@ func start_death_respawn_sequence() -> void:
 	else:
 		await get_tree().create_timer(1.2).timeout
 
-	# 2. Respawn at active Portal Checkpoint
 	if has_checkpoint:
 		global_position = active_checkpoint
 	else:
@@ -576,12 +578,10 @@ func start_death_respawn_sequence() -> void:
 	dash_cooldown_timer = 0.0
 	update_hud_display()
 
-	# 3. Fade screen back to Transparent
 	if fade_rect:
 		var tween_in = create_tween()
 		tween_in.tween_property(fade_rect, "modulate:a", 0.0, 0.8)
 
-	# 4. Perform Character Blinks
 	for i in range(5):
 		animated_sprite.visible = false
 		await get_tree().create_timer(0.12).timeout
@@ -651,12 +651,19 @@ func perform_dodge_attack_step() -> void:
 func enable_sword_hitbox() -> void:
 	if sword_hitbox:
 		sword_hitbox.monitoring = true
+		
+		# Sync Hitbox position with current AnimatedSprite offset
+		sword_hitbox.position = animated_sprite.offset
+
+		# Enable correct directional shape
 		if animated_sprite.flip_h:
-			if hitbox_left: hitbox_left.disabled = true
-			if hitbox_right: hitbox_right.disabled = false
-		else:
+			# Facing LEFT
 			if hitbox_left: hitbox_left.disabled = false
 			if hitbox_right: hitbox_right.disabled = true
+		else:
+			# Facing RIGHT
+			if hitbox_left: hitbox_left.disabled = true
+			if hitbox_right: hitbox_right.disabled = false
 
 func disable_sword_hitbox() -> void:
 	if sword_hitbox:
@@ -737,7 +744,7 @@ func change_state(new_state: State) -> void:
 
 		State.AIR_DASH:
 			can_air_dash = false
-			dash_cooldown_timer = DASH_COOLDOWN_TIME # Start 3-second dash cooldown
+			dash_cooldown_timer = DASH_COOLDOWN_TIME
 			play_animation("aerial_dash")
 			
 			if dash_fx_sprite:
@@ -770,7 +777,6 @@ func _on_animation_finished() -> void:
 		if current_health < max_health:
 			current_health = min(current_health + 1, max_health)
 			update_hud_display()
-		# Start 5-second cooldown timer after heal finishes
 		heal_cooldown_timer = HEAL_COOLDOWN_TIME
 		change_state(State.NORMAL)
 	elif current_state == State.ATTACK:

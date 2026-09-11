@@ -4372,7 +4372,7 @@ _data = {
 size = Vector2(15, 49)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8wyap"]
-size = Vector2(20, 42)
+size = Vector2(40, 42)
 
 [node name="Player" type="CharacterBody2D" unique_id=248399568 groups=["player"]]
 safe_margin = 0.01
@@ -4406,9 +4406,9 @@ shape = SubResource("RectangleShape2D_mokdk")
 position = Vector2(60, 0)
 
 [node name="CollisionShapeRight" type="CollisionShape2D" parent="Hitbox" unique_id=796430386]
-position = Vector2(-25, 0)
+position = Vector2(-21, 0)
 shape = SubResource("RectangleShape2D_8wyap")
 
 [node name="CollisionShapeLeft" type="CollisionShape2D" parent="Hitbox" unique_id=1513776021]
-position = Vector2(-90, 1)
+position = Vector2(-98, 0)
 shape = SubResource("RectangleShape2D_8wyap")

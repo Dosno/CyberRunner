@@ -312,7 +312,7 @@ radius = 6.0
 height = 14.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p07s1"]
-size = Vector2(325, 20)
+size = Vector2(123, 20)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1atk5"]
 size = Vector2(2, 20)
@@ -334,7 +334,7 @@ shape = SubResource("CapsuleShape2D_mokdk")
 [node name="DetectionArea" type="Area2D" parent="." unique_id=1571842859]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" unique_id=254835850]
-position = Vector2(0.5, 0)
+position = Vector2(1.5, 0)
 shape = SubResource("RectangleShape2D_p07s1")
 
 [node name="AttackArea" type="Area2D" parent="." unique_id=395125379]
